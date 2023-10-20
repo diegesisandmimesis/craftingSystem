@@ -11,4 +11,5 @@
 -lib ruleEngine/ruleEngine
 -lib stateMachine/stateMachine
 -lib ../craftingSystem
+-source reflect.t
 -source src/sample.t

@@ -5,7 +5,7 @@
 #include <adv3.h>
 #include <en_us.h>
 
-#include "craftinSystem.h"
+#include "craftingSystem.h"
 
 // Module ID for the library
 craftingSystemModuleID: ModuleID {
@@ -15,6 +15,39 @@ craftingSystemModuleID: ModuleID {
         listingOrder = 99
 }
 
-class CraftingSystem: RuleEngineObject
+class CraftingSystemObject: RuleEngineObject
 	syslogID = 'CraftingSystem'
+	syslogFlag = 'craftingSystem'
+;
+
+craftingSystemPreinit: PreinitObject
+	execute() {
+		initializeRecipeSteps();
+		initializeRecipes();
+	}
+
+	initializeRecipeSteps() {
+		forEachInstance(RecipeStep, function(o) {
+			o.initializeRecipeStep();
+		});
+	}
+
+	initializeRecipes() {
+		forEachInstance(Recipe, function(o) {
+			o.initializeRecipe();
+		});
+	}
+
+;
+
+class CraftingSystem: CraftingSystemObject
+	_recipeList = perInstance(new Vector())
+
+	addRecipe(obj) {
+		if((obj == nil) || !obj.ofKind(Recipe))
+			return;
+		_recipeList.append(obj);
+	}
+
+	listRecipes() {}
 ;

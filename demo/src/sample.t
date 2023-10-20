@@ -40,7 +40,60 @@ versionInfo: GameID
 	}
 ;
 
+gameMain: GameMainDef
+	initialPlayerChar = me
+	newGame() {
+		syslog.enable('Recipe');
+		syslog.enable('ruleEngine');
+		syslog.enable('RuleEngine');
+		syslog.enable('RuleEngineMatches');
+
+		syslog.enable('StateMachine');
+
+		runGame(true);
+	}
+;
+
+class Bread: Thing, CraftingIngredient
+	'(slice) bread' 'slice of bread'
+	"It's a slice of bread. "
+	isEquivalent = true
+;
+
+class Toast: Thing, CraftingIngredient
+	'(slice) toast' 'slice of toast'
+	"It's a slice of toast. "
+	isEquivalent = true
+;
+
+class ButteredToast: Thing, CraftingIngredient
+	'(slice) (buttered) toast' 'slice of buttered toast'
+	"A slice of buttered toast. "
+	isEquivalent = true
+;
+
 startRoom: Room 'Void' "This is a featureless void.";
 +me: Person;
+++Bread;
++toaster: Thing, Container, CraftingGear '(silver) (metal) toaster' 'toaster'
+	"A silver toaster. "
+	canFitObjThruOpening(obj) { return(obj.ofKind(Bread)); }
+	dobjFor(TurnOn) {
+		verify() {}
+	}
+;
++butter: Thing, CraftingGear
+	'(stick) butter' 'stick of butter'
+	"A stick of butter. "
+;
 
-gameMain: GameMainDef initialPlayerChar = me;
+myRuleEngine: RuleEngine;
+
+cookingSystem: CraftingSystem;
+
++Recipe 'toast' @Toast;
+++RecipeStep @Bread @toaster ->PutInAction;
+++RecipeStep @toaster ->TurnOnAction;
+
++Recipe 'buttered toast' @ButteredToast;
+++RecipeStep @butter @Toast ->PutOnAction;
