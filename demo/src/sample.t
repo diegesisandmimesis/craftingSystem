@@ -60,7 +60,7 @@ class Bread: Thing, CraftingIngredient
 	isEquivalent = true
 ;
 
-class Toast: Thing, CraftingIngredient
+class Toast: Bread, CraftingIngredient
 	'(slice) toast' 'slice of toast'
 	"It's a slice of toast. "
 	isEquivalent = true
@@ -75,12 +75,12 @@ class ButteredToast: Thing, CraftingIngredient
 startRoom: Room 'Void' "This is a featureless void.";
 +me: Person;
 ++Bread;
-+toaster: Thing, Container, CraftingGear '(silver) (metal) toaster' 'toaster'
-	"A silver toaster. "
-	canFitObjThruOpening(obj) { return(obj.ofKind(Bread)); }
++toaster: Container, CraftingGear '(silver) (metal) toaster slot' 'toaster'
+	"A silver toaster with a slot on the top. "
 	dobjFor(TurnOn) {
 		verify() {}
 	}
+	canFitObjThruOpening(obj) { return(obj.ofKind(Bread)); }
 ;
 +butter: Thing, CraftingGear
 	'(stick) butter' 'stick of butter'
@@ -91,9 +91,20 @@ myRuleEngine: RuleEngine;
 
 cookingSystem: CraftingSystem;
 
-+Recipe 'toast' @Toast;
-++RecipeStep @Bread @toaster ->PutInAction;
-++RecipeStep @toaster ->TurnOnAction;
+// Recipe declaration.
+// First arg is the ID.
+// Second is what it produces.
+// Third is where it will be produced.
+//+Recipe 'toast' @Toast ->(toaster.location);
++Recipe 'toast' @Toast ->toaster;
+++RecipeAction @Bread @toaster ->PutInAction
+	"{You/he} put{s} <<gDobj.theName>> in the toaster. "
+;
+++RecipeAction @toaster ->TurnOnAction
+	recipeAction() {
+		"The toaster produces a slice of toast. ";
+	}
+;
 
 +Recipe 'buttered toast' @ButteredToast;
-++RecipeStep @butter @Toast ->PutOnAction;
+++RecipeAction @butter @Toast ->PutOnAction;
