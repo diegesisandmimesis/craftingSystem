@@ -14,7 +14,9 @@
 #error "stateMachine should be in /home/user/tads/stateMachine ."
 #endif // STATE_MACHINE_H
 
-Recipe template 'id' @result ->resultLocation?;
+Recipe template 'id' @result? ->resultLocation? "recipeAction"?;
+
+RecipeStep template "recipeAction"?;
 
 RecipeAction template @srcObject | [srcObject] @dstObject | [dstObject] ->action | [action] "recipeAction"?;
 RecipeAction template @dstObject | [dstObject] ->action | [action] "recipeAction"?;

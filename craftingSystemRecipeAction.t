@@ -37,10 +37,6 @@ class RecipeAction: RecipeStep
 		return(r);
 	}
 
-	isReversible() { return((reversible == true) ? true : nil); }
-
-	recipeAction() {}
-
-	listRecipeStep() {}
-	printStateMachine() {}
+	// Return a trigger matching our configuration.
+	createRule() { return(new Trigger(getConfig())); }
 ;

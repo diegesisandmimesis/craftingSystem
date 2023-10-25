@@ -65,12 +65,16 @@ class RecipeTransitionReversible: RecipeTransition reversible = true;
 
 // RecipeEnd is for handling the last state transition in the recipe.
 class RecipeEnd: RecipeTransition
+/*
 	transitionAction() {
 		consumeIngredients();
 
+		recipeAction();
+	}
+*/
+
+	afterTransition() {
 		if(recipe != nil)
 			recipe.produceResult();
-
-		recipeAction();
 	}
 ;

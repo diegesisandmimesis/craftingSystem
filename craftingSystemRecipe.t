@@ -7,7 +7,8 @@
 
 #include "craftingSystem.h"
 
-class Recipe: CraftingSystemObject
+// Recipe is a special kind of state machine.
+class Recipe: StateMachine, CraftingSystemObject
 	syslogID = 'Recipe'
 	syslogFlag = 'Recipe'
 
@@ -26,31 +27,42 @@ class Recipe: CraftingSystemObject
 	// Ordered list of our steps.
 	_recipeSteps = perInstance(new Vector())
 
-	// StateMachine used to track the recipe state.
-	_stateMachine = perInstance(new StateMachine())
-
+	// Returns the ID of the numbered recipe step.
 	getStepID(idx) {
+		// Check that the index is valid.
 		if((idx < 1) || (idx > _recipeSteps.length))
 			return(nil);
+
+		// If step has a declared ID, use it.
 		if(_recipeSteps[idx].id != nil)
 			return(_recipeSteps[idx].id);
-		return('step <<toString(idx)>>');
+
+		return(_indexToStepID(idx));
 	}
 
+	// Converts an index (number) into a step ID.
+	// This is simple, but we make it its own method in case we
+	// need to change it.
+	_indexToStepID(idx) { return('step <<toString(idx)>>'); }
+
+	// Utility methods for getting the first and last step IDs.
 	getFirstStepID() { return(getStepID(1)); }
 	getLastStepID() { return(getStepID(_recipeSteps.length)); }
 
+	// Return the given numbered step object.
 	getStep(idx) {
 		if((idx < 1) || (idx > _recipeSteps.length))
 			return(nil);
 		return(_recipeSteps[idx]);
 	}
 
+	// Called at preinit.
 	initializeRecipe() {
 		initializeRecipeLocation();
 		initializeRecipeStates();
 	}
 
+	// Create state machine states for each recipe step.
 	initializeRecipeStates() {
 		local i;
 
@@ -60,11 +72,12 @@ class Recipe: CraftingSystemObject
 		stateID = getStepID(1);
 		
 		for(i = 1; i <= _recipeSteps.length; i++) {
-			if(_stateMachine.addState(createRecipeState(i)) != true)
+			if(addState(createRecipeState(i)) != true)
 				_debug('failed to add state');
 		}
 	}
 
+	// Add this recipe to its crafting system.
 	initializeRecipeLocation() {
 		if((location == nil) || !location.ofKind(CraftingSystem))
 			return;
@@ -126,29 +139,20 @@ class Recipe: CraftingSystemObject
 		// Let the transition know which recipe it's part of.
 		r.recipe = self;
 
-		//step.setRecipeAction(r);
-		//r.setMethod(&recipeAction, step.(&recipeAction));
-		//r.(&recipeAction) = step.(&recipeAction);
-
 		return(r);
 	}
 
 	// Creates a Trigger instance for the conditions specified in the
 	// numbered recipe step.
-	_createTrigger(idx) {
-		local r, step;
+	_createRule(idx) {
+		local step;
 
 		// Get the step instance.  It holds the configuration data.
 		if((step = getStep(idx)) == nil)
 			return(nil);
 
 		// Create the trigger and set its properties.
-		r = new Trigger(step.getConfig());
-		//r.srcObject = step.srcObject;
-		//r.dstObject = step.dstObject;
-		//r.action = step.action;
-
-		return(r);
+		return(step.createRule());
 	}
 
 	// Create and set up a new RecipeState instance for handling
@@ -175,9 +179,9 @@ class Recipe: CraftingSystemObject
 
 		_debug('\ttoState = <q><<book.toState>></q>');
 
-		// Create the Trigger instance.
-		if((rule = _createTrigger(idx)) == nil) {
-			_error('failed to create trigger for recipe
+		// Create the Rule/Trigger instance.
+		if((rule = _createRule(idx)) == nil) {
+			_error('failed to create rule for recipe
 				step <<toString(idx)>>');
 			return(nil);
 		}
@@ -218,6 +222,8 @@ class Recipe: CraftingSystemObject
 		} else {
 			_produceSingleResult(result, loc);
 		}
+
+		recipeAction();
 	}
 
 	_produceSingleResult(cls, loc) {
@@ -231,4 +237,6 @@ class Recipe: CraftingSystemObject
 	}
 
 	listRecipeSteps() {}
+
+	recipeAction() {}
 ;
