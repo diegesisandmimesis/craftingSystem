@@ -1,12 +1,9 @@
 name: craftingSystem Library
 source: craftingSystem.t
 source: craftingSystemRecipe.t
-source: craftingSystemRecipeStep.t
-source: craftingSystemRecipeAction.t
 source: craftingSystemRecipeState.t
-source: craftingSystemRecipeRule.t
-source: craftingSystemRecipeTransition.t
+source: craftingSystemRecipeCompiler.t
+source: craftingSystemRecipeStep.t
 source: craftingSystemIngredient.t
 source: craftingSystemGear.t
-source: craftingSystemAction.t
 source: craftingSystemDebug.t

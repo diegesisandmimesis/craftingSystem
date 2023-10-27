@@ -14,13 +14,14 @@
 #error "stateMachine should be in /home/user/tads/stateMachine ."
 #endif // STATE_MACHINE_H
 
-Recipe template 'id' @result? ->resultLocation? "recipeAction"?;
+Recipe template 'recipeID' @result? ->resultLocation? "recipeAction"?;
 
-Ingredient template @ingredient ->gear? "recipeAction"?;
+IngredientList template 'stepID'? ->gear? "recipeAction"?;
+Ingredient template @ingredient ->gear?;
 
-RecipeStep template "recipeAction"?;
+RecipeStep template 'stepID'? "recipeAction"?;
 
-RecipeAction template @srcObject | [srcObject] @dstObject | [dstObject] ->action | [action] "recipeAction"?;
-RecipeAction template @dstObject | [dstObject] ->action | [action] "recipeAction"?;
+RecipeAction template 'stepID'? @srcObject | [srcObject] @dstObject | [dstObject] ->action | [action] "recipeAction"?;
+RecipeAction template 'stepID'? @dstObject | [dstObject] ->action | [action] "recipeAction"?;
 
 #define CRAFTING_SYSTEM_H

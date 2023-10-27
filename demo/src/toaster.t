@@ -1,6 +1,6 @@
 #charset "us-ascii"
 //
-// stepTest.t
+// ingredientTest.t
 // Version 1.0
 // Copyright 2022 Diegesis & Mimesis
 //
@@ -8,7 +8,7 @@
 //
 // It can be compiled via the included makefile with
 //
-//	# t3make -f stepTest.t3m
+//	# t3make -f ingredientTest.t3m
 //
 // ...or the equivalent, depending on what TADS development environment
 // you're using.
@@ -43,56 +43,49 @@ versionInfo: GameID
 gameMain: GameMainDef
 	initialPlayerChar = me
 	newGame() {
-		syslog.enable('Recipe');
-		syslog.enable('ruleEngine');
-		syslog.enable('RuleEngine');
-		syslog.enable('RuleEngineMatches');
+		syslog.enable('transition');
+		syslog.enable('rule');
+		showIntro();
 
-		syslog.enable('StateMachine');
+forEachInstance(StateMachine, function(o) {
+	o.debugStateMachine();
+});
 
 		runGame(true);
 	}
+	showIntro() {
+	}
 ;
 
-class Bread: Thing, CraftingIngredient
-	'(slice) bread' 'slice of bread'
-	"It's <<aName>>. "
+class Slice: Thing, CraftingIngredient
+	desc = "It's <<aName>>. "
 	isEquivalent = true
 ;
 
-class Toast: Bread '(slice) toast' 'slice of toast';
-
-class ButteredToast: Thing, CraftingIngredient
-	'(slice) (buttered) toast' 'slice of buttered toast'
-	"A slice of buttered toast. "
-	isEquivalent = true
-;
+class Bread: Slice '(slice) bread' 'slice of bread';
+class Toast: Slice '(slice) toast' 'slice of toast';
 
 startRoom: Room 'Void' "This is a featureless void.";
 +me: Person;
 ++Bread;
 +toaster: Container, CraftingGear '(silver) (metal) toaster slot' 'toaster'
-	"A silver toaster with a slot on the top. "
-	dobjFor(TurnOn) {
-		verify() {}
-		action() {
-			reportFailure('There\'s no reason to turn it on now. ');
+	"A silver toaster with a single slot on the top. "
+	dobjFor(TurnOn) { verify() {} }
+	iobjFor(PutIn) {
+		verify() {
+			if(contents.length != 0)
+				illogicalNow('The toaster can only hold one
+					thing at a time. ');
 		}
 	}
-	canFitObjThruOpening(obj) { return(obj.ofKind(Bread)); }
+	canFitObjThruOpening(obj) { return(obj.ofKind(Slice)); }
 ;
 
-myRuleEngine: RuleEngine;
+RuleEngine;
 
 cookingSystem: CraftingSystem;
 
 +Recipe 'toast' @Toast ->toaster "The toaster produces a slice of toast. ";
-++RecipeStep
-	"The bread is in the toaster. "
-	rule() { return(toaster.containsOnlyA(Bread)); }
-	//rule() { aioSay('\nrule\n '); return(true); }
-	//rule() { return(true); }
-;
-++RecipeAction @toaster ->TurnOnAction
-	recipeAction() { "The toaster heats up. "; }
-;
+++IngredientList;
++++Ingredient @Bread;
+++RecipeAction @toaster ->TurnOnAction "The toaster heats up. ";

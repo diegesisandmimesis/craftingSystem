@@ -17,16 +17,12 @@ craftingSystemModuleID: ModuleID {
 
 class CraftingSystemObject: RuleEngineObject
 	syslogID = 'CraftingSystem'
-	syslogFlag = 'craftingSystem'
-
-	canonicalizeAsList(l) {
-		if(l == nil) return(nil);
-		if(l.ofKind(Vector)) return(l.toList());
-		if(!l.ofKind(List)) return([ l ]);
-		return(l);
-	}
+	syslogFlag = 'CraftingSystem'
 ;
 
+// Ownership-agnostic preinit.  Goes through all the various bits of recipes
+// and makes sure they're inintialized, but we don't keep track of anything
+// in this singleton.
 craftingSystemPreinit: PreinitObject
 	execute() {
 		initializeIngredients();
@@ -51,17 +47,26 @@ craftingSystemPreinit: PreinitObject
 			o.initializeRecipe();
 		});
 	}
-
 ;
 
+// Base class for crafting systems.
 class CraftingSystem: CraftingSystemObject
+	syslogID = 'CraftingSystem'
+
 	_recipeList = perInstance(new Vector())
 
 	addRecipe(obj) {
 		if((obj == nil) || !obj.ofKind(Recipe))
-			return;
+			return(nil);
+		obj.craftingSystem = self;
 		_recipeList.append(obj);
+		return(true);
 	}
 
-	listRecipes() {}
+	removeRecipe(obj) {
+		if(_recipeList.indexOf(obj) == nil)
+			return(nil);
+		_recipeList.removeElement(obj);
+		return(true);
+	}
 ;

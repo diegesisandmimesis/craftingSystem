@@ -7,98 +7,79 @@
 
 #include "craftingSystem.h"
 
+// Recipe is a special kind of state machine.
 class RecipeStep: CraftingSystemObject
 	syslogID = 'RecipeStep'
+	syslogFlag = 'RecipeStep'
 
-	reversible = true
+	// Unique(ish) ID for this recipe step.
+	stepID = nil
 
-	rule = nil
+	// The recipe we're part of.
+	recipe = nil
+
+	recipeStep = nil
 
 	initializeRecipeStep() {
 		if((location == nil) || !location.ofKind(Recipe))
 			return;
-
 		location.addRecipeStep(self);
-		recipe = location;
 	}
 
-	createRule() {
-		local obj;
+	createRecipeTransition(idx, state) { return(nil); }
 
-		if(!propDefined(&rule) || (propType(&rule) == TypeNil))
-			return(nil);
-		
-		obj = new RecipeRule();
-		obj.recipeStep = self;
+	_createRecipeTransition(idx, reverse?) {
+		local nextIdx, r;
 
-		return(obj);
+		if(idx == recipe._recipeStep.length) {
+			nextIdx = 1;
+			r = new RecipeEnd();
+		} else {
+			nextIdx = ((reverse == true) ? (idx - 1) : (idx + 1));
+			r = new RecipeTransition();
+		}
+
+
+		r.toState = recipe.getStepID(nextIdx);
+		r.recipeStep = self;
+		r.recipe = recipe;
+
+		return(r);
 	}
-
-	matchRule(data?) { return(rule()); }
 
 	recipeAction() {}
-
-        isReversible() { return((reversible == true) ? true : nil); }
-
-        listRecipeStep() {}
-        printStateMachine() {}
 ;
 
-/*
-class RecipeStepRevert: RecipeStep
-	matchRule(data?) { return(!rule()); }
-;
-*/
+class RecipeAction: RecipeStep, Tuple
+	syslogID = 'RecipeAction'
 
-class RecipeStepIngredientList: RecipeStep
-	createRule(recipe, step, ingr) {
-		local i, loc, rule;
+	createRecipeTransition(idx, state) {
+		local book, rule;
 
-		// Make sure the step is a Step.
-		if((step == nil) || !step.ofKind(RecipeStep)) {
-			_error('invalid recipe step');
+		if((book = _createRecipeTransition(idx)) == nil) {
+			_error('failed to create transition');
 			return(nil);
 		}
 
-		// Make sure the ingr is an Ingredient (or a list of them)
-		if(ingr == nil) {
-			_error('invalid ingredient:  nil');
-			return(nil);
-		}
-		if(ingr.ofKind(Vector)) {
-			for(i = 1; i <= ingr.length; i++) {
-				if(!ingr[i].ofKind(Ingredient)) {
-					_error('invalid ingredient: list');
-					return(nil);
-				}
-			}
-		} else {
-			if(!ingr.ofKind(Ingredient)) {
-				_error('invalid ingredient: object');
-				return(nil);
-			}
-		}
-
-		rule = new IngredientRule();
-		rule.ingredient = ingr.ingredient;
-		if(ingr.gear != nil) {
-			loc = ingr.gear;
-		} else {
-			loc = recipe.result;
-		}
-
-		if(loc == nil) {
-			_error('unable to determine ingredient rule location');
+		if((rule = createRule(idx)) == nil) {
+			_error('failed to create rule');
 			return(nil);
 		}
 
-		if(!loc.ofKind(CraftingGear)) {
-			_error('invalid ingredient rule location');
-			return(nil);
-		}
+		book.addRule(rule);
+		state.addRulebook(book);
 
-		rule.gear = loc;
+		return(true);
+	}
 
-		return(rule);
+	createRule(idx) {
+		local r;
+
+		r = new Trigger();
+		r.srcObject = srcObject;
+		r.dstObject = dstObject;
+		r.action = action;
+
+		return(r);
 	}
 ;

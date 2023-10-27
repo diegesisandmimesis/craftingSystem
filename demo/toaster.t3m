@@ -2,7 +2,7 @@
 -D MESSAGESTYLE=neu
 -Fy obj -Fo obj
 -Fs ../..
--o games/stepTest.t3
+-o games/toaster.t3
 -lib system
 -lib adv3/adv3
 -lib syslog/syslog
@@ -12,4 +12,4 @@
 -lib stateMachine/stateMachine
 -lib ../craftingSystem
 -source reflect.t
--source src/stepTest.t
+-source src/toaster.t
