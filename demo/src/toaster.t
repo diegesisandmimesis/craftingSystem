@@ -40,10 +40,20 @@ versionInfo: GameID
 	}
 ;
 
+modify syslog
+	_flag = static [
+		'rulebook' -> true,
+		'rule' -> true,
+		'ruleuser' -> true
+	]
+;
+
 gameMain: GameMainDef
 	initialPlayerChar = me
 	newGame() {
 		syslog.enable('transition');
+		syslog.enable('ruleuser');
+		syslog.enable('rulebook');
 		syslog.enable('rule');
 		showIntro();
 
@@ -66,8 +76,6 @@ class Bread: Slice '(slice) bread' 'slice of bread';
 class Toast: Slice '(slice) toast' 'slice of toast';
 
 startRoom: Room 'Void' "This is a featureless void.";
-+me: Person;
-++Bread;
 +toaster: Container, CraftingGear '(silver) (metal) toaster slot' 'toaster'
 	"A silver toaster with a single slot on the top. "
 	dobjFor(TurnOn) { verify() {} }
@@ -80,6 +88,10 @@ startRoom: Room 'Void' "This is a featureless void.";
 	}
 	canFitObjThruOpening(obj) { return(obj.ofKind(Slice)); }
 ;
+
++me: Person;
+++Bread;
+++Bread;
 
 RuleEngine;
 

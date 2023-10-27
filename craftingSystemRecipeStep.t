@@ -28,7 +28,7 @@ class RecipeStep: CraftingSystemObject
 
 	createRecipeTransition(idx, state) { return(nil); }
 
-	_createRecipeTransition(idx, reverse?) {
+	_createRecipeTransition(idx, state, reverse?) {
 		local nextIdx, r;
 
 		if(idx == recipe._recipeStep.length) {
@@ -43,6 +43,7 @@ class RecipeStep: CraftingSystemObject
 		r.toState = recipe.getStepID(nextIdx);
 		r.recipeStep = self;
 		r.recipe = recipe;
+		r.ruleUser = state;
 
 		return(r);
 	}
@@ -56,7 +57,7 @@ class RecipeAction: RecipeStep, Tuple
 	createRecipeTransition(idx, state) {
 		local book, rule;
 
-		if((book = _createRecipeTransition(idx)) == nil) {
+		if((book = _createRecipeTransition(idx, state)) == nil) {
 			_error('failed to create transition');
 			return(nil);
 		}

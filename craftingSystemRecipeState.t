@@ -11,12 +11,16 @@ class RecipeState: State, CraftingSystemObject
 	syslogID = 'RecipeState'
 	syslogFlag = 'RecipeState'
 
+	_ruleEngineInitFlag = true
+
 	recipe = nil
 ;
 
 class RecipeTransition: Transition, CraftingSystemObject
 	syslogID = 'RecipeTransition'
 	syslogFlag = 'RecipeTransition'
+
+	_ruleEngineInitFlag = true
 
 	transitionAction() {
 		consumeIngredients();
@@ -28,8 +32,6 @@ class RecipeTransition: Transition, CraftingSystemObject
 	recipeAction() {
 		recipeStep.recipeAction();
 	}
-	beforeTransition() { "beforeTransition()\n "; }
-	afterTransition() { "afterTransition()\n "; }
 ;
 
 class RecipeEnd: RecipeTransition
@@ -38,7 +40,6 @@ class RecipeEnd: RecipeTransition
 	}
 
 	afterTransition() {
-_debug('afterTransition()');
 		recipe.produceResult();
 	}
 ;

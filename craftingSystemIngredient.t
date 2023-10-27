@@ -36,7 +36,7 @@ class IngredientList: RecipeStep
 	createRecipeTransition(idx, state) {
 		local book, rule;
 
-		if((book = _createRecipeTransition(idx)) == nil) {
+		if((book = _createRecipeTransition(idx, state)) == nil) {
 			_error('failed to create transition');
 			return(nil);
 		}
