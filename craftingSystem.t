@@ -18,12 +18,26 @@ craftingSystemModuleID: ModuleID {
 class CraftingSystemObject: RuleEngineObject
 	syslogID = 'CraftingSystem'
 	syslogFlag = 'craftingSystem'
+
+	canonicalizeAsList(l) {
+		if(l == nil) return(nil);
+		if(l.ofKind(Vector)) return(l.toList());
+		if(!l.ofKind(List)) return([ l ]);
+		return(l);
+	}
 ;
 
 craftingSystemPreinit: PreinitObject
 	execute() {
+		initializeIngredients();
 		initializeRecipeSteps();
 		initializeRecipes();
+	}
+
+	initializeIngredients() {
+		forEachInstance(Ingredient, function(o) {
+			o.initializeIngredient();
+		});
 	}
 
 	initializeRecipeSteps() {

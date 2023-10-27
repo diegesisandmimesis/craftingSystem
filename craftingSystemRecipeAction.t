@@ -18,13 +18,6 @@ class RecipeAction: RecipeStep
 
 	reversible = nil
 
-	initializeRecipeStep() {
-		if((location == nil) || !location.ofKind(Recipe))
-			return;
-		location.addRecipeStep(self);
-		recipe = location;
-	}
-
 	getConfig() {
 		local r;
 

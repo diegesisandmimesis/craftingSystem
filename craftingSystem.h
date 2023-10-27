@@ -16,6 +16,8 @@
 
 Recipe template 'id' @result? ->resultLocation? "recipeAction"?;
 
+Ingredient template @ingredient ->gear? "recipeAction"?;
+
 RecipeStep template "recipeAction"?;
 
 RecipeAction template @srcObject | [srcObject] @dstObject | [dstObject] ->action | [action] "recipeAction"?;

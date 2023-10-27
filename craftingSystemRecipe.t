@@ -27,6 +27,9 @@ class Recipe: StateMachine, CraftingSystemObject
 	// Ordered list of our steps.
 	_recipeSteps = perInstance(new Vector())
 
+	// List of ingredients
+	_ingredientList = nil
+
 	// Returns the ID of the numbered recipe step.
 	getStepID(idx) {
 		// Check that the index is valid.
@@ -56,15 +59,39 @@ class Recipe: StateMachine, CraftingSystemObject
 		return(_recipeSteps[idx]);
 	}
 
+	// Add an ingredient to the list, creating a new list if one
+	// doesn't already exist.
+	addIngredient(obj) {
+		if((obj == nil) || !obj.ofKind(Ingredient))
+			return(nil);
+
+		if(_ingredientList == nil)
+			_ingredientList = new Vector();
+
+		_ingredientList.append(obj);
+
+		return(true);
+	}
+
 	// Called at preinit.
 	initializeRecipe() {
 		initializeRecipeLocation();
 		initializeRecipeStates();
 	}
 
+	// Add this recipe to its crafting system.
+	initializeRecipeLocation() {
+		if((location == nil) || !location.ofKind(CraftingSystem))
+			return;
+		location.addRecipe(self);
+		craftingSystem = location;
+	}
+
 	// Create state machine states for each recipe step.
 	initializeRecipeStates() {
 		local i;
+
+		canonicalizeRecipeSteps();
 
 		_debug('initializing recipe <q><<id>></q>:
 			<<toString(_recipeSteps.length)>> steps');
@@ -77,12 +104,16 @@ class Recipe: StateMachine, CraftingSystemObject
 		}
 	}
 
-	// Add this recipe to its crafting system.
-	initializeRecipeLocation() {
-		if((location == nil) || !location.ofKind(CraftingSystem))
+	// If this recipe has an ingredient list, add a recipe step that
+	// checks if all the ingredients are where they're supposed to be.
+	canonicalizeRecipeSteps() {
+		local obj;
+
+		if(_ingredientList == nil)
 			return;
-		location.addRecipe(self);
-		craftingSystem = location;
+
+		obj = new RecipeStepIngredientList();
+		_recipeSteps.insertAt(1, obj);
 	}
 
 	// Returns a new RecipeState instance for the given numbered step.
@@ -94,12 +125,14 @@ class Recipe: StateMachine, CraftingSystemObject
 		r.id = getStepID(idx);
 		r.recipe = self;
 
+		r._initFlag = true;
+
 		return(r);
 	}
 
 	// Returns a Transition instance for the transition between the
 	// given numbered recipe step and whichever step comes after it.
-	_createTransition(idx) {
+	_createTransition(idx, reverse?) {
 		local nextIdx, r, step;
 
 		// Check to see if we're creating the last step in the
@@ -114,7 +147,10 @@ class Recipe: StateMachine, CraftingSystemObject
 		} else {
 			// By default the next step is just the next
 			// numbered step.
-			nextIdx = idx + 1;
+			if(reverse == true)
+				nextIdx = idx - 1;
+			else
+				nextIdx = idx + 1;
 
 			if((step = getStep(idx)) == nil)
 				return(nil);
@@ -158,6 +194,70 @@ class Recipe: StateMachine, CraftingSystemObject
 	// Create and set up a new RecipeState instance for handling
 	// the step number given by the argument.
 	createRecipeState(idx) {
+		local step;
+
+		step = getStep(idx);
+		if(step.ofKind(RecipeStepIngredientList))
+			return(createRecipeStateIngredients(idx));
+		else
+			return(createRecipeStateNormal(idx));
+	}
+
+	createRecipeStateIngredients(idx) {
+		local book, i, rs, step;
+
+		if((rs = _createRecipeState(idx)) == nil) {
+			_error('failed to create state for recipe
+				ingredients <<toString(idx)>>');
+			return(nil);
+		}
+
+		_debug('adding recipe step <<toString(idx)>>:
+			<<toString(rs.id)>>');
+
+		// Create the Transition instance.
+		if((book = _createTransition(idx)) == nil) {
+			_error('failed to create forward transition for recipe
+				step <<toString(idx)>>');
+			return(nil);
+		}
+
+		step = getStep(idx);
+
+		_debug('Adding <<toString(_ingredientList.length)>> ingredient
+			rules.');
+		for(i = 1; i <= _ingredientList.length; i++) {
+			if((rule = step.createRule(self, step,
+				_ingredientList[i])) == nil) {
+				_error('failed to create rule for
+					ingredient <<toString(i)>>');
+				
+			}
+			book.addRule(rule);
+		}
+
+		_debug('\tforward = <q><<book.toState>></q>');
+
+		rs.addRulebook(book);
+
+/*
+		// Create the "reverse" transition.
+		if((book = _createTransition(idx, true)) == nil) {
+			_error('failed to create reverse transition for recipe
+				step <<toString(idx)>>');
+			return(nil);
+		}
+
+		_debug('\treverse = <q><<book.toState>></q>');
+
+		//book.addRule(rule);
+		rs.addRulebook(book);
+*/
+
+		return(rs);
+	}
+
+	createRecipeStateNormal(idx) {
 		local book, rule, rs;
 
 		// Create the State instance.
