@@ -19,11 +19,8 @@ class RecipeStep: CraftingSystemObject
 	recipe = nil
 
 	recipeStep = nil
-
 	recipeTransition = nil
-
 	recipeRule = nil
-
 	recipeIdx = nil
 
 	initializeRecipeStep() {

@@ -51,12 +51,23 @@ class IngredientList: RecipeStep
 	}
 
 	createReverseTransition(state) {
-		local book;
-		if((book = _createRecipeTransition(state, true)) == nil) {
+		local book, rule, t;
+
+		t = recipeTransition;
+
+		if((book = _createRecipeTransitionByClass(RecipeTransition,
+			state, recipeIdx)) == nil) {
 			_error('failed to create transition');
 			return(nil);
 		}
-		book.addRule(recipeRule);
+
+		book.recipeAction = nil;
+		recipeTransition = t;
+
+		rule = new IngredientRuleReverse();
+		rule.ingredientRule = recipeRule;
+
+		book.addRule(rule);
 		state.addRulebook(book);
 
 		return(true);
@@ -91,12 +102,13 @@ class IngredientList: RecipeStep
 	}
 
 	recipeStepSetup() {
-/*
-		if(createReverseTransition() != true) {
+		local state;
+
+		state = recipe.getStateByID(recipeTransition.toState);
+		if(createReverseTransition(state) != true) {
 			_error('failed to create reverse transition');
 			return;
 		}
-*/
 	}
 ;
 
@@ -116,6 +128,18 @@ class Ingredient: CraftingSystemObject
 			return;
 
 		location.addIngredient(self);
+	}
+;
+
+class IngredientRuleReverse: Rule, CraftingSystemObject
+	syslogID = 'IngredientRuleReverse'
+
+	ingredientRule = nil
+
+	matchRule(data?) {
+		if(ingredientRule == nil)
+			return(nil);
+		return(!ingredientRule.check());
 	}
 ;
 
