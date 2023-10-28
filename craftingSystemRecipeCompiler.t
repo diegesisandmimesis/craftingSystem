@@ -121,7 +121,7 @@ modify Recipe
 
 		lastState = _stateStack[_stateStack.length];
 
-		fromState = nil;
+		fromState = _stateStack[1];
 		toState = nil;
 
 		n = 0;
@@ -129,13 +129,10 @@ modify Recipe
 			o = _recipeStep[i];
 			if(o.ofKind(RecipeStepWithState)) {
 				n += 1;
-				fromState = _getStateByIndex(i);
+				fromState = _getStateByIndex(n);
 				toState = _getStateByIndex(n + 1);
 			}
-if(fromState == lastState) {
-	aioSay('\ncreating final transition\n ');
-	aioSay('\n<<toString(fromState.id)>> to <<toString(toState.id)>>\n ');
-}
+
 			o.createRecipeTransitions(fromState, toState,
 				(fromState == lastState));
 		}

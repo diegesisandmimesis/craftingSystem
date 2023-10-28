@@ -93,14 +93,16 @@ RuleEngine;
 
 cookingSystem: CraftingSystem;
 
+//+Recipe 'toast' @Toast ->toaster "The toaster produces a slice of toast. ";
 /*
-+Recipe 'toast' @Toast ->toaster "The toaster produces a slice of toast. ";
++Recipe 'toast' @Toast ->toaster;
 ++Ingredient @Bread;
-++RecipeAction @toaster ->TurnOnAction "The toaster heats up. ";
+++RecipeAction @toaster ->TurnOnAction;
 */
 
 +Recipe 'toast' @Toast ->toaster "The toaster produces a slice of toast. ";
+++RecipeNoAction @toaster ->TurnOnAction
+	"The toaster won't start without bread. ";
 ++IngredientList "{You/He} put{s} the bread in the toaster. ";
 +++Ingredient @Bread;
-//+++RecipeBlank @toaster ->TurnOnAction "There's nothing in the toaster. ";
-++RecipeAction @toaster ->TurnOnAction "The toaster heats up. ";
+++RecipeAction @toaster ->TurnOnAction "{You/he} start{s} the toaster. ";

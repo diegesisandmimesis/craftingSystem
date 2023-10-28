@@ -21,7 +21,9 @@ Ingredient template @ingredient ->gear?;
 
 RecipeStep template 'stepID'? "recipeAction"?;
 
-RecipeAction template 'stepID'? @srcObject | [srcObject] @dstObject | [dstObject] ->action | [action] "recipeAction"?;
-RecipeAction template 'stepID'? @dstObject | [dstObject] ->action | [action] "recipeAction"?;
+RecipeStepWithTrigger template 'stepID'? @srcObject | [srcObject] \
+	@dstObject | [dstObject] ->action | [action] "recipeAction"?;
+RecipeStepWithTrigger template 'stepID'? @dstObject | [dstObject] \
+	->action | [action] "recipeAction"?;
 
 #define CRAFTING_SYSTEM_H

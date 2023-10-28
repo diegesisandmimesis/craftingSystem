@@ -69,7 +69,7 @@ class RecipeStepWithState: RecipeStep
 
 ;
 
-class RecipeAction: RecipeStepWithState, Tuple
+class RecipeStepWithTrigger: RecipeStep, Tuple
 	syslogID = 'RecipeAction'
 
 	createRecipeTransitions(fromState, toState, last?) {
@@ -106,14 +106,15 @@ class RecipeAction: RecipeStepWithState, Tuple
 	}
 ;
 
-/*
-class RecipeBlank: RecipeAction
-	syslogID = 'RecipeBlank'
+class RecipeAction: RecipeStepWithState, RecipeStepWithTrigger;
 
-	createRecipeTransition(state) {
+class RecipeNoAction: RecipeStepWithTrigger
+	syslogID = 'RecipeNoAction'
+
+	createRecipeTransition(fromState, toState) {
 		local book, rule;
 
-		if((book = _createRecipeNoTransition(state)) == nil) {
+		if((book = _createRecipeNoTransition(fromState)) == nil) {
 			_error('failed to create transition');
 			return(nil);
 		}
@@ -124,9 +125,21 @@ class RecipeBlank: RecipeAction
 		}
 
 		book.addRule(rule);
-		state.addRulebook(book);
+		fromState.addRulebook(book);
 
 		return(true);
 	}
+
+	createRule() {
+		local r;
+
+		r = new Trigger();
+		r.srcObject = srcObject;
+		r.dstObject = dstObject;
+		r.action = action;
+
+		recipeRule = r;
+
+		return(r);
+	}
 ;
-*/
