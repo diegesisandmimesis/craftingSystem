@@ -39,18 +39,24 @@ modify Recipe
 		_debug('compiling <<toString(_recipeStep.length)>> steps');
 		for(i = 1; i <= _recipeStep.length; i++) {
 			// Create the State instance for this recipe step.
-			if((s = _createRecipeState(i, _recipeStep[i])) == nil) {
-				_error('failed to create state for recipe
-					step <<toString(i)>>');
+			if((s = _createRecipeState(_recipeStep[i])) == nil) {
+				_error('failed to create state for recipe step
+					<q><<toString(_recipeStep[i]
+					.stepID)>></q>');
 				return(nil);
 			}
 
 			// Add the state to the recipe's state machine.
 			if(addRecipeState(s) != true) {
-				_error('failed to add state for recipe
-					step <<toString(i)>>');
+				_error('failed to add state for recipe step
+					<q><<toString(_recipeStep[i]
+					.stepID)>></q>');
 				return(nil);
 			}
+		}
+
+		for(i = 1; i <= _recipeStep.length; i++) {
+			_recipeStep[i].recipeStepSetup();
 		}
 
 		return(true);
@@ -61,10 +67,11 @@ modify Recipe
 	_canonicalizeRecipeStep(i, step) {
 		if(step.stepID == nil)
 			step.stepID = 'step <<toString(i)>>';
+		step.recipeIdx = i;
 	}
 
 	// Create the state for for given step.
-	_createRecipeState(idx, step) {
+	_createRecipeState(step) {
 		local r;
 
 		r = new RecipeState();
@@ -73,9 +80,9 @@ modify Recipe
 		r.recipe = self;
 
 		// Create all the state's transitions.
-		if(step.createRecipeTransition(idx, r) != true) {
+		if(step.createRecipeTransition(r) != true) {
 			_error('failed to create transitions for recipe
-				step <<toString(idx)>>');
+				<<toString(step.stepID)>>');
 			return(nil);
 		}
 

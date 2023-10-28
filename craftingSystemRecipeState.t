@@ -34,6 +34,16 @@ class RecipeTransition: Transition, CraftingSystemObject
 	}
 ;
 
+class RecipeNoTransition: NoTransition, CraftingSystemObject
+
+	transitionAction() {
+		recipeAction();
+	}
+	recipeAction() {
+		recipeStep.recipeAction();
+	}
+;
+
 class RecipeEnd: RecipeTransition
 	consumeIngredients() {
 		recipe.consumeIngredients();

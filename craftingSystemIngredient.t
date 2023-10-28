@@ -14,8 +14,6 @@ class IngredientList: RecipeStep
 
 	gear = nil
 
-	rule = nil
-
 	addIngredient(obj) {
 		if((obj == nil) || !obj.ofKind(Ingredient))
 			return(nil);
@@ -33,15 +31,15 @@ class IngredientList: RecipeStep
 
 	recipeAction() {}
 
-	createRecipeTransition(idx, state) {
+	createRecipeTransition(state) {
 		local book, rule;
 
-		if((book = _createRecipeTransition(idx, state)) == nil) {
+		if((book = _createRecipeTransition(state)) == nil) {
 			_error('failed to create transition');
 			return(nil);
 		}
 
-		if((rule = createRule(idx)) == nil) {
+		if((rule = createRule()) == nil) {
 			_error('failed to create rule');
 			return(nil);
 		}
@@ -52,7 +50,19 @@ class IngredientList: RecipeStep
 		return(true);
 	}
 
-	createRule(idx) {
+	createReverseTransition(state) {
+		local book;
+		if((book = _createRecipeTransition(state, true)) == nil) {
+			_error('failed to create transition');
+			return(nil);
+		}
+		book.addRule(recipeRule);
+		state.addRulebook(book);
+
+		return(true);
+	}
+
+	createRule() {
 		local r, v;
 
 		r = new IngredientRule();
@@ -64,10 +74,11 @@ class IngredientList: RecipeStep
 		else
 			v = nil;
 
-		if(r.initializeIngredientRule(_ingredientList.toList(), v) != true)
+		if(r.initializeIngredientRule(_ingredientList.toList(), v)
+			!= true)
 			return(nil);
 
-		rule = r;
+		recipeRule = r;
 
 		return(r);
 	}
@@ -75,8 +86,17 @@ class IngredientList: RecipeStep
 	_testGear(v) { return((v != nil) && v.ofKind(CraftingGear)); }
 
 	consumeIngredients() {
-		if(rule)
-			rule.consumeIngredients();
+		if(recipeRule)
+			recipeRule.consumeIngredients();
+	}
+
+	recipeStepSetup() {
+/*
+		if(createReverseTransition() != true) {
+			_error('failed to create reverse transition');
+			return;
+		}
+*/
 	}
 ;
 

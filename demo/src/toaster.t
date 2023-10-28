@@ -40,6 +40,7 @@ versionInfo: GameID
 	}
 ;
 
+// Hack to enable preinit debugging when compiled with -D SYSLOG
 modify syslog
 	_flag = static [
 		'rulebook' -> true,
@@ -52,14 +53,9 @@ gameMain: GameMainDef
 	initialPlayerChar = me
 	newGame() {
 		syslog.enable('transition');
-		syslog.enable('ruleuser');
-		syslog.enable('rulebook');
-		syslog.enable('rule');
 		showIntro();
 
-forEachInstance(StateMachine, function(o) {
-	o.debugStateMachine();
-});
+		gDebugStateMachines();
 
 		runGame(true);
 	}
@@ -97,7 +93,14 @@ RuleEngine;
 
 cookingSystem: CraftingSystem;
 
+/*
 +Recipe 'toast' @Toast ->toaster "The toaster produces a slice of toast. ";
-++IngredientList;
+++Ingredient @Bread;
+++RecipeAction @toaster ->TurnOnAction "The toaster heats up. ";
+*/
+
++Recipe 'toast' @Toast ->toaster "The toaster produces a slice of toast. ";
+++IngredientList "{You/He} put{s} the bread in the toaster. ";
 +++Ingredient @Bread;
+//+++RecipeBlank @toaster ->TurnOnAction "There's nothing in the toaster. ";
 ++RecipeAction @toaster ->TurnOnAction "The toaster heats up. ";
