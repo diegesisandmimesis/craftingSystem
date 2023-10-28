@@ -24,7 +24,10 @@ class Recipe: StateMachine, CraftingSystemObject
 	// The CraftingSystem we're part of.
 	craftingSystem = nil
 
-	// Ordered list of our steps.
+	// Ordered list of the "raw" recipe steps.
+	_recipeStepList = perInstance(new Vector())
+
+	// Ordered list of the "compiled" recipe steps.
 	_recipeStep = perInstance(new Vector())
 
 	// Called at preinit.

@@ -7,7 +7,7 @@
 
 #include "craftingSystem.h"
 
-class IngredientList: RecipeStep
+class IngredientList: RecipeStepWithState
 	syslogID = 'IngredientList'
 
 	_ingredientList = perInstance(new Vector())
@@ -31,44 +31,34 @@ class IngredientList: RecipeStep
 
 	recipeAction() {}
 
-	createRecipeTransition(state) {
-		local book, rule;
+	createRecipeTransitions(fromState, toState, last?) {
+		local book0, book1, rule0, rule1;
 
-		if((book = _createRecipeTransition(state)) == nil) {
+		if((book0 = _createRecipeTransition(fromState, toState, last))
+			== nil) {
 			_error('failed to create transition');
 			return(nil);
 		}
 
-		if((rule = createRule()) == nil) {
+		if((rule0 = createRule()) == nil) {
 			_error('failed to create rule');
 			return(nil);
 		}
 
-		book.addRule(rule);
-		state.addRulebook(book);
+		book0.addRule(rule0);
+		fromState.addRulebook(book0);
 
-		return(true);
-	}
-
-	createReverseTransition(state) {
-		local book, rule, t;
-
-		t = recipeTransition;
-
-		if((book = _createRecipeTransitionByClass(RecipeTransition,
-			state, recipeIdx)) == nil) {
+		if((book1 = _createRecipeTransition(toState, fromState))
+			== nil) {
 			_error('failed to create transition');
 			return(nil);
 		}
 
-		book.recipeAction = nil;
-		recipeTransition = t;
+		rule1 = new IngredientRuleReverse();
+		rule1.ingredientRule = rule0;
 
-		rule = new IngredientRuleReverse();
-		rule.ingredientRule = recipeRule;
-
-		book.addRule(rule);
-		state.addRulebook(book);
+		book1.addRule(rule1);
+		toState.addRulebook(book1);
 
 		return(true);
 	}
@@ -99,16 +89,6 @@ class IngredientList: RecipeStep
 	consumeIngredients() {
 		if(recipeRule)
 			recipeRule.consumeIngredients();
-	}
-
-	recipeStepSetup() {
-		local state;
-
-		state = recipe.getStateByID(recipeTransition.toState);
-		if(createReverseTransition(state) != true) {
-			_error('failed to create reverse transition');
-			return;
-		}
 	}
 ;
 

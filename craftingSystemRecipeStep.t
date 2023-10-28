@@ -7,7 +7,6 @@
 
 #include "craftingSystem.h"
 
-// Recipe is a special kind of state machine.
 class RecipeStep: CraftingSystemObject
 	syslogID = 'RecipeStep'
 	syslogFlag = 'RecipeStep'
@@ -29,38 +28,35 @@ class RecipeStep: CraftingSystemObject
 		location.addRecipeStep(self);
 	}
 
-	createRecipeTransition(state) { return(nil); }
+	createRecipeTransitions(fromState, toState, last?) { return(nil); }
 
-	_createRecipeTransitionByClass(cls, state, toIdx) {
+	_createRecipeTransitionByClass(cls, fromState, toState) {
 		local r;
 
 		r = cls.createInstance();
 		r.recipeStep = self;
 		r.recipe = recipe;
-		r.ruleUser = state;
-		if(toIdx)
-			r.toState = recipe.getStepID(toIdx);
+		r.ruleUser = fromState;
+		r.toState = ((toState != nil) ? toState.id : nil);
 
 		recipeTransition = r;
 
 		return(r);
 	}
 
-	_createRecipeTransition(state, reverse?) {
-		if(recipeIdx == recipe._recipeStep.length) {
+	_createRecipeTransition(fromState, toState, last?) {
+		if(last == true) {
 			return(_createRecipeTransitionByClass(RecipeEnd,
-				state, 1));
+				fromState, toState));
 		}
 
 		return(_createRecipeTransitionByClass(RecipeTransition,
-			state,
-			((reverse == true) ? (recipeIdx - 1)
-				: (recipeIdx + 1))));
+			fromState, toState));
 	}
 
-	_createRecipeNoTransition(state, reverse?) {
+	_createRecipeNoTransition(fromState) {
 		return(_createRecipeTransitionByClass(RecipeNoTransition,
-			state, nil));
+			fromState, nil));
 	}
 
 	recipeStepSetup() {}
@@ -68,13 +64,19 @@ class RecipeStep: CraftingSystemObject
 	recipeAction() {}
 ;
 
-class RecipeAction: RecipeStep, Tuple
+class RecipeStepWithState: RecipeStep
+	syslogID = 'RecipeStepWithState'
+
+;
+
+class RecipeAction: RecipeStepWithState, Tuple
 	syslogID = 'RecipeAction'
 
-	createRecipeTransition(state) {
+	createRecipeTransitions(fromState, toState, last?) {
 		local book, rule;
 
-		if((book = _createRecipeTransition(state)) == nil) {
+		if((book = _createRecipeTransition(fromState, toState, last))
+			== nil) {
 			_error('failed to create transition');
 			return(nil);
 		}
@@ -85,7 +87,7 @@ class RecipeAction: RecipeStep, Tuple
 		}
 
 		book.addRule(rule);
-		state.addRulebook(book);
+		fromState.addRulebook(book);
 
 		return(true);
 	}
@@ -104,6 +106,7 @@ class RecipeAction: RecipeStep, Tuple
 	}
 ;
 
+/*
 class RecipeBlank: RecipeAction
 	syslogID = 'RecipeBlank'
 
@@ -126,3 +129,4 @@ class RecipeBlank: RecipeAction
 		return(true);
 	}
 ;
+*/
