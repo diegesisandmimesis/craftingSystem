@@ -2,54 +2,74 @@
 //
 // craftingSystemRecipeState.t
 //
+//	The StateMachine-specific crafting system classes.
+//
 #include <adv3.h>
 #include <en_us.h>
 
 #include "craftingSystem.h"
 
+// Recipe-specific subclass of State.
 class RecipeState: State, CraftingSystemObject
 	syslogID = 'RecipeState'
 	syslogFlag = 'RecipeState'
 
+	// We set this flag so the RuleEngine instance doesn't try to
+	// initialize us.  All RecipeState instances are created dynamically
+	// at preinit, so we take care of initialization ourself.
 	_ruleEngineInitFlag = true
 
+	// Property to remember which recipe we're part of.
 	recipe = nil
 ;
 
-class RecipeTransition: Transition, CraftingSystemObject
+class RecipeStepTransition: Transition, CraftingSystemObject
+	recipeStep = nil
+
+	// Recipe-specific action called during a transition.
+	// By default we just call whatever's defined on the RecipeStep
+	// instance that created us.
+	recipeAction() { recipeStep.recipeAction(); }
+;
+
+// Recipe-specific Transition subclass.
+//class RecipeTransition: Transition, CraftingSystemObject
+class RecipeTransition: RecipeStepTransition
 	syslogID = 'RecipeTransition'
 	syslogFlag = 'RecipeTransition'
 
+	// The RecipeStep instance that created us.
+	recipeStep = nil
+
+	// Make sure the RuleEngine instance doesn't try to initialize us.
 	_ruleEngineInitFlag = true
 
+	// Recipe-specific transition action.
 	transitionAction() {
 		consumeIngredients();
 		recipeAction();
 	}
 
+	// By default we do not consume our ingredients, but subclasses
+	// can overwrite this if they want to (e.g., for recipes where
+	// adding an ingredient would be destructive, like cracking an egg
+	// into a bowl).
 	consumeIngredients() {}
-
-	recipeAction() {
-		recipeStep.recipeAction();
-	}
 ;
 
-class RecipeNoTransition: NoTransition, CraftingSystemObject
-
-	transitionAction() {
-		recipeAction();
-	}
-	recipeAction() {
-		recipeStep.recipeAction();
-	}
+// "No transition" transition.  Mostly so we can display informational messages.
+class RecipeNoTransition: RecipeStepTransition, NoTransition
+	// We never consume any ingredients.
+	transitionAction() { recipeAction(); }
 ;
 
+// Special Transition class for finishing the recipe.
+// We consume any ingredients used in the recipe and then produce whatever
+// the recipe produces.
 class RecipeEnd: RecipeTransition
-	consumeIngredients() {
-		recipe.consumeIngredients();
-	}
+	// Consume all the ingredients in the recipe.
+	consumeIngredients() { recipe.consumeIngredients(); }
 
-	afterTransition() {
-		recipe.produceResult();
-	}
+	// Produce whatever the recipe produces.
+	afterTransition() { recipe.produceResult(); }
 ;
