@@ -1,6 +1,6 @@
 #charset "us-ascii"
 //
-// ingredientTest.t
+// toaster.t
 // Version 1.0
 // Copyright 2022 Diegesis & Mimesis
 //
@@ -8,7 +8,7 @@
 //
 // It can be compiled via the included makefile with
 //
-//	# t3make -f ingredientTest.t3m
+//	# t3make -f toaster.t3m
 //
 // ...or the equivalent, depending on what TADS development environment
 // you're using.
