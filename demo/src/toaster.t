@@ -93,8 +93,11 @@ RuleEngine;
 
 cookingSystem: CraftingSystem;
 
-//+Recipe 'toast' @Toast ->toaster "The toaster produces a slice of toast. ";
 /*
+ * Barebones version of the recipe.
+ * Not really usable (from a gameplay perspective) but provided to
+ * illustrate the basic moving parts.
+ *
 +Recipe 'toast' @Toast ->toaster;
 ++Ingredient @Bread;
 ++RecipeAction @toaster ->TurnOnAction;
