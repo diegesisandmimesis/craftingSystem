@@ -29,11 +29,10 @@ class RecipeStepTransition: Transition, CraftingSystemObject
 	// Recipe-specific action called during a transition.
 	// By default we just call whatever's defined on the RecipeStep
 	// instance that created us.
-	recipeAction() { recipeStep.recipeAction(); }
+	recipeAction() { recipeStep._recipeAction(); }
 ;
 
 // Recipe-specific Transition subclass.
-//class RecipeTransition: Transition, CraftingSystemObject
 class RecipeTransition: RecipeStepTransition
 	syslogID = 'RecipeTransition'
 	syslogFlag = 'RecipeTransition'
@@ -63,13 +62,19 @@ class RecipeNoTransition: RecipeStepTransition, NoTransition
 	transitionAction() { recipeAction(); }
 ;
 
+class RecipeTransitionIrreversible: RecipeTransition
+	consumeIngredients() { inherited(); recipeStep.consumeIngredients(); }
+;
+
 // Special Transition class for finishing the recipe.
 // We consume any ingredients used in the recipe and then produce whatever
 // the recipe produces.
 class RecipeEnd: RecipeTransition
 	// Consume all the ingredients in the recipe.
-	consumeIngredients() { recipe.consumeIngredients(); }
+	consumeIngredients() { inherited(); recipe.consumeIngredients(); }
 
 	// Produce whatever the recipe produces.
 	afterTransition() { recipe.produceResult(); }
 ;
+
+class RecipeIrreversibleEnd: RecipeTransitionIrreversible, RecipeEnd;

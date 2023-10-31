@@ -63,13 +63,20 @@ gameMain: GameMainDef
 	}
 ;
 
-class Slice: Thing, CraftingIngredient
+class Slice: Thing, Surface, CraftingIngredient
 	desc = "It's <<aName>>. "
 	isEquivalent = true
 ;
 
 class Bread: Slice '(slice) bread' 'slice of bread';
 class Toast: Slice '(slice) toast' 'slice of toast';
+class ButteredBread: Bread '(buttered) (slice) bread' 'slice of buttered bread';
+class ButteredToast: Toast '(buttered) (slice) toast' 'slice of buttered toast';
+
+class Butter: CraftingIngredient '(pat) butter' 'pat of butter'
+	"It's <<aName>>. "
+	isEquivalent = true
+;
 
 startRoom: Room 'Void' "This is a featureless void.";
 +toaster: Container, CraftingGear '(silver) (metal) toaster slot' 'toaster'
@@ -85,9 +92,10 @@ startRoom: Room 'Void' "This is a featureless void.";
 	canFitObjThruOpening(obj) { return(obj.ofKind(Slice)); }
 ;
 
-+me: Person;
++me: Person, CraftingGear;
 ++Bread;
 ++Bread;
+++Butter;
 
 RuleEngine;
 
@@ -109,3 +117,25 @@ cookingSystem: CraftingSystem;
 ++IngredientList "{You/He} put{s} the bread in the toaster. ";
 +++Ingredient @Bread;
 ++RecipeAction @toaster ->TurnOnAction "{You/he} start{s} the toaster. ";
+
+/*
++Recipe 'buttered toast' @ButteredToast;
+++RecipeAction @Butter @Toast ->PutOnAction
+	recipeAction() {
+		local obj;
+
+		obj = new ButteredToast();
+		obj.moveInto(gIobj.location);
+		gDobj.moveInto(nil);
+		gIobj.moveInto(nil);
+		"{You/He} butter{s} the toast. ";
+	}
+;
+*/
++Recipe 'buttered toast' @ButteredToast;
+++IngredientSwap @Butter @Toast ->PutOnAction
+	"{You/He} butter{s} the toast. ";
+
++Recipe 'buttered bread' @ButteredBread;
+++IngredientSwap @Butter @Bread ->PutOnAction
+	"{You/He} butter{s} the bread. ";

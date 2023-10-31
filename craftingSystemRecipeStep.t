@@ -83,8 +83,19 @@ class RecipeStep: CraftingSystemObject
 		return(_createRecipeTransition(fromState, toState, last));
 	}
 
+	// Wrapper.
+	_recipeAction() { recipeAction(); }
+
 	// Stub method.
 	recipeAction() {}
+
+	consumeIngredients() {}
+	consumeIngredient(obj) {
+		if((obj == nil) || !obj.ofKind(CraftingIngredient))
+			return(nil);
+		obj.moveInto(nil);
+		return(true);
+	}
 ;
 
 // Class for recipe steps that create new states.  Used as a mixin.
@@ -139,7 +150,24 @@ class RecipeStepWithTrigger: RecipeStep, Tuple
 
 // General recipe action.  It creates a new state and has a trigger to
 // switch to it.
-class RecipeAction: RecipeStepWithState, RecipeStepWithTrigger;
+class RecipeAction: RecipeStepWithState, RecipeStepWithTrigger
+	consumeIngredients() {
+		consumeIngredient(gDobj);
+		consumeIngredient(gIobj);
+	}
+;
+
+class RecipeActionIrreversible: RecipeAction
+	_createRecipeTransition(fromState, toState, last?) {
+		if(last == true) {
+			return(_createRecipeTransitionByClass(
+				RecipeIrreversibleEnd, fromState, toState));
+		}
+
+		return(_createRecipeTransitionByClass(
+			RecipeTransitionIrreversible, fromState, toState));
+	}
+;
 
 // "No action" action trigger.  This is primarily for informational message,
 // like reporting that turning a toaster on with nothing in it does nothing.
@@ -151,37 +179,4 @@ class RecipeNoAction: RecipeStepWithTrigger
 	createSingleRecipeTransition(fromState, toState, last?) {
 		return(_createRecipeNoTransition(fromState));
 	}
-/*
-	createRecipeTransition(fromState, toState) {
-		local book, rule;
-
-		if((book = _createRecipeNoTransition(fromState)) == nil) {
-			_error('failed to create transition');
-			return(nil);
-		}
-
-		if((rule = createRule()) == nil) {
-			_error('failed to create rule');
-			return(nil);
-		}
-
-		book.addRule(rule);
-		fromState.addRulebook(book);
-
-		return(true);
-	}
-
-	createRule() {
-		local r;
-
-		r = new Trigger();
-		r.srcObject = srcObject;
-		r.dstObject = dstObject;
-		r.action = action;
-
-		recipeRule = r;
-
-		return(r);
-	}
-*/
 ;

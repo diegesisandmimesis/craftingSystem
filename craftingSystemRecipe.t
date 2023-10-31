@@ -27,6 +27,9 @@ class Recipe: StateMachine, CraftingSystemObject
 	// the individual ingredients.
 	resultLocation = nil
 
+	// Set by IngredientSwap when changing the resultLocation
+	_resultLocationFlag = nil
+
 	// The CraftingSystem we're part of.
 	craftingSystem = nil
 
@@ -47,6 +50,18 @@ class Recipe: StateMachine, CraftingSystemObject
 		if((location == nil) || !location.ofKind(CraftingSystem))
 			return;
 		location.addRecipe(self);
+	}
+
+	clearResultLocationFlag() {
+		if(_resultLocationFlag == nil)
+			return;
+		_resultLocationFlag = nil;
+		resultLocation = nil;
+	}
+
+	setLocationFlag(loc) {
+		resultLocation = loc;
+		_resultLocationFlag = true;
 	}
 
 	// Returns the "bottommost" ingredient list.
@@ -173,5 +188,15 @@ class Recipe: StateMachine, CraftingSystemObject
 				return;
 			o.consumeIngredients();
 		});
+	}
+
+	validateStateTransition() {
+		// If the state ID is changing, always okay.
+		if(_nextStateID != stateID)
+			return(true);
+
+		// If the state ID is NOT changing, it's only okay
+		// if we only have one state.
+		return(_stateStack.length == 1);
 	}
 ;

@@ -7,6 +7,22 @@
 
 #include "craftingSystem.h"
 
+class IngredientSwap: RecipeAction
+	syslogID = 'IngredientSwap'
+
+	_recipeAction() {
+		clearResultLocationFlag();
+		if(recipe.resultLocation == nil) {
+			if(gIobj.ofKind(CraftingIngredient))
+				recipe.setLocationFlag(gIobj.location);
+			else if(gDobj.ofKind(CraftingIngredient))
+				recipe.setLocationFlag(gDobj.location);
+		}
+		consumeIngredients();
+		recipeAction();
+	}
+;
+
 // IngredientList is a specialized subclass of RecipeStep.  It creates
 // a new state (whatever happens after the ingredients are all assembled)
 // and TWO transitions:  one to the new state from whatever the current
