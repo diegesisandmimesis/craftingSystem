@@ -6,4 +6,5 @@ source: craftingSystemRecipeCompiler.t
 source: craftingSystemRecipeStep.t
 source: craftingSystemIngredient.t
 source: craftingSystemGear.t
+source: craftingSystemAction.t
 source: craftingSystemDebug.t

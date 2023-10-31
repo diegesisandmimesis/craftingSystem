@@ -133,7 +133,7 @@ cookingSystem: CraftingSystem;
 ;
 */
 +Recipe 'buttered toast' @ButteredToast;
-++IngredientSwap @Butter @Toast ->PutOnAction
+++IngredientAction @Butter @Toast ->PutOnAction
 	"{You/He} butter{s} the toast. ";
 
 +Recipe 'buttered bread' @ButteredBread;
