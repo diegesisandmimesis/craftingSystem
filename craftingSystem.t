@@ -148,6 +148,21 @@
 //	message.  It too could use a recipeAction() method if desired.
 //
 //
+// NOTES
+//
+//	For single-step recipes, use the IngredientAction class.
+//	It has the same syntax as a RecipeAction, but any objects
+//	involved in the action which are instaces of CraftingIngredient
+//	will be consumed by the action.
+//
+//		+Recipe 'buttered toast' @ButteredToast;
+//		++IngredientAction @Butter @Toast ->PutOnAction
+//			"{You/He} butter{s} the toast. ";
+//
+//	The result of an IngredientAction recipe will end up in the
+//	location of the gIobj of the action if one is defined, the gDobj
+//	of the action otherwise.
+//
 #include <adv3.h>
 #include <en_us.h>
 
