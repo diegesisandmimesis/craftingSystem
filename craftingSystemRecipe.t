@@ -27,7 +27,7 @@ class Recipe: StateMachine, CraftingSystemObject
 	// the individual ingredients.
 	resultLocation = nil
 
-	// Set by IngredientSwap when changing the resultLocation
+	// Set by IngredientAction when changing the resultLocation
 	_resultLocationFlag = nil
 
 	// The CraftingSystem we're part of.

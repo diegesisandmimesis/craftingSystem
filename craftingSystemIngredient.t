@@ -7,8 +7,8 @@
 
 #include "craftingSystem.h"
 
-class IngredientSwap: RecipeAction
-	syslogID = 'IngredientSwap'
+class IngredientAction: RecipeAction
+	syslogID = 'IngredientAction'
 
 	_recipeAction() {
 		clearResultLocationFlag();
