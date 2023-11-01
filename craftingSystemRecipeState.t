@@ -30,6 +30,14 @@ class RecipeStepTransition: Transition, CraftingSystemObject
 	// By default we just call whatever's defined on the RecipeStep
 	// instance that created us.
 	recipeAction() { recipeStep._recipeAction(); }
+
+/*
+	tryCheck(type?) {
+		if(recipe.checkRecipeLocation() != true)
+			return(nil);
+		return(inherited(type));
+	}
+*/
 ;
 
 // Recipe-specific Transition subclass.

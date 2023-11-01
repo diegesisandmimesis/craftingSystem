@@ -12,4 +12,5 @@
 -lib stateMachine/stateMachine
 -lib ../craftingSystem
 -source reflect.t
+-source src/kitchenWorld.t
 -source src/toaster.t

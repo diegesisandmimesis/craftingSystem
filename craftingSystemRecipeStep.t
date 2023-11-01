@@ -51,7 +51,7 @@ class RecipeStep: CraftingSystemObject
 		r.recipe = recipe;
 
 		// Record what states we transition between.
-		r.ruleUser = fromState;
+		r.ruleSystem = fromState;
 		r.toState = ((toState != nil) ? toState.id : nil);
 
 		//recipeTransition = r;

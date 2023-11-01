@@ -49,6 +49,8 @@ modify Recipe
 			}
 		}
 
+		setupRecipeShortcut();
+
 		return(true);
 	}
 
@@ -166,5 +168,12 @@ modify Recipe
 		state.recipe = self;
 
 		return(state);
+	}
+
+	setupRecipeShortcut() {
+		if(_recipeShortcut == nil)
+			return;
+
+		_recipeShortcut.setupRecipeShortcut();
 	}
 ;

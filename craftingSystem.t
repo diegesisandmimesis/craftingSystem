@@ -189,6 +189,7 @@ craftingSystemPreinit: PreinitObject
 	execute() {
 		initializeIngredients();
 		initializeRecipeSteps();
+		initializeRecipeShortcuts();
 		initializeRecipes();
 	}
 
@@ -215,11 +216,50 @@ craftingSystemPreinit: PreinitObject
 			o.initializeRecipe();
 		});
 	}
+
+	initializeRecipeShortcuts() {
+		forEachInstance(RecipeShortcut, function(o) {
+			o.initializeRecipeShortcut();
+		});
+	}
 ;
+
+/*
+craftingSystemManager: CraftingSystemObject, BeforeAfterThing, PreinitObject
+	syslogID = 'craftingSystemManager'
+
+	_craftingSystemList = perInstance(new Vector())
+
+	_lastLocation = nil
+
+	execute() {
+		forEachInstance(CraftingSystem, function(o) {
+			_craftingSystemList.append(o);
+		});
+	}
+
+	// We update after the action, because the only actions we
+	// really care about are movement actions (which will change the
+	// location)
+	globalAfterAction() {
+		if(gActor.location == _lastLocation)
+			return;
+		_lastLocation = gActor.location;
+
+		_craftingSystemList.forEach(function(o) {
+			o.checkCraftingLocation();
+		});
+	}
+;
+*/
 
 // Base class for crafting systems.  These are collections of recipes.
 class CraftingSystem: CraftingSystemObject
 	syslogID = 'CraftingSystem'
+
+	// If defined, the recipes in this crafting system are only available
+	// in this location.
+	craftingLocation = nil
 
 	// A vector of all the recipes we take care of.
 	_recipeList = perInstance(new Vector())
@@ -250,4 +290,10 @@ class CraftingSystem: CraftingSystemObject
 
 		return(true);
 	}
+
+/*
+	checkCraftingLocation() {
+		aioSay('Checking crafting location\n ');
+	}
+*/
 ;

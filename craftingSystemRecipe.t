@@ -33,8 +33,14 @@ class Recipe: StateMachine, CraftingSystemObject
 	// The CraftingSystem we're part of.
 	craftingSystem = nil
 
+	// If defined, this recipe is only active in the given location.
+	craftingLocation = nil
+
 	// Ordered list of the recipe steps.
 	_recipeStep = perInstance(new Vector())
+
+	// RecipeShortcut instance for this recipe, if defined.
+	_recipeShortcut = nil
 
 	// Called at preinit.
 	initializeRecipe() {
@@ -50,6 +56,13 @@ class Recipe: StateMachine, CraftingSystemObject
 		if((location == nil) || !location.ofKind(CraftingSystem))
 			return;
 		location.addRecipe(self);
+	}
+
+	addRecipeShortcut(obj) {
+		if((obj == nil) || !obj.ofKind(RecipeShortcut))
+			return;
+
+		_recipeShortcut = obj;
 	}
 
 	clearResultLocationFlag() {
@@ -198,5 +211,13 @@ class Recipe: StateMachine, CraftingSystemObject
 		// If the state ID is NOT changing, it's only okay
 		// if we only have one state.
 		return(_stateStack.length == 1);
+	}
+
+	checkRecipeLocation() {
+		if(craftingLocation == nil)
+			return(true);
+		if(gActor.getOutermostRoom() != craftingLocation)
+			return(nil);
+		return(true);
 	}
 ;

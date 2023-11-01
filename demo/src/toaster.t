@@ -60,44 +60,22 @@ gameMain: GameMainDef
 		runGame(true);
 	}
 	showIntro() {
+		"This demo includes a simple recipe for toast:
+		<.p>
+		\n<b>&gt;PUT BREAD IN TOASTER</b>
+		\n<b>&gt;TURN TOASTER ON</b>
+		<.p> ";
 	}
-;
-
-class Slice: Thing, Surface, CraftingIngredient
-	desc = "It's <<aName>>. "
-	isEquivalent = true
-;
-
-class Bread: Slice '(slice) bread' 'slice of bread';
-class Toast: Slice '(slice) toast' 'slice of toast';
-class ButteredBread: Bread '(buttered) (slice) bread' 'slice of buttered bread';
-class ButteredToast: Toast '(buttered) (slice) toast' 'slice of buttered toast';
-
-class Butter: CraftingIngredient '(pat) butter' 'pat of butter'
-	"It's <<aName>>. "
-	isEquivalent = true
 ;
 
 startRoom: Room 'Void' "This is a featureless void.";
-+toaster: Container, CraftingGear '(silver) (metal) toaster slot' 'toaster'
-	"A silver toaster with a single slot on the top. "
-	dobjFor(TurnOn) { verify() {} }
-	iobjFor(PutIn) {
-		verify() {
-			if(contents.length != 0)
-				illogicalNow('The toaster can only hold one
-					thing at a time. ');
-		}
-	}
-	canFitObjThruOpening(obj) { return(obj.ofKind(Slice)); }
-;
++toaster: Toaster;
 
 +me: Person, CraftingGear;
 ++Bread;
 ++Bread;
-++Butter;
 
-RuleEngine;
+//RuleEngine;
 
 cookingSystem: CraftingSystem;
 
@@ -111,31 +89,12 @@ cookingSystem: CraftingSystem;
 ++RecipeAction @toaster ->TurnOnAction;
 */
 
-+Recipe 'toast' @Toast ->toaster "The toaster produces a slice of toast. ";
++Recipe 'toast' @Toast ->toaster
+	"The toaster produces a slice of toast. ";
 ++RecipeNoAction @toaster ->TurnOnAction
 	"The toaster won't start without bread. ";
-++IngredientList "{You/He} put{s} the bread in the toaster. ";
+++IngredientList
+	"{You/He} put{s} the bread in the toaster. ";
 +++Ingredient @Bread;
-++RecipeAction @toaster ->TurnOnAction "{You/he} start{s} the toaster. ";
-
-/*
-+Recipe 'buttered toast' @ButteredToast;
-++RecipeAction @Butter @Toast ->PutOnAction
-	recipeAction() {
-		local obj;
-
-		obj = new ButteredToast();
-		obj.moveInto(gIobj.location);
-		gDobj.moveInto(nil);
-		gIobj.moveInto(nil);
-		"{You/He} butter{s} the toast. ";
-	}
-;
-*/
-+Recipe 'buttered toast' @ButteredToast;
-++IngredientAction @Butter @Toast ->PutOnAction
-	"{You/He} butter{s} the toast. ";
-
-+Recipe 'buttered bread' @ButteredBread;
-++IngredientAction @Butter @Bread ->PutOnAction
-	"{You/He} butter{s} the bread. ";
+++RecipeAction @toaster ->TurnOnAction
+	"{You/he} start{s} the toaster. ";

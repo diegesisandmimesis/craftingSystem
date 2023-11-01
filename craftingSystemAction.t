@@ -7,28 +7,79 @@
 
 #include "craftingSystem.h"
 
-#ifdef CRAFTING_SYSTEM_ACTION
-
+/*
 modify playerActionMessages
-	cantMakeThat = '{You/he} can\'t make that. '
+	cantCraftThat = '{You/He} can\'t <<gAction.craftingVerb>> that. '
+	cantCraftThatDontKnow = '{You/He} {do}n\'t know how to
+		<<gAction.craftingVerb>> that. '
+	cantCraftObj(obj) {
+		return('{You/he} can\'t <<gAction.craftingVerb>>
+			<<obj.name>>. ');
+	}
+
+	cantCraftHere = '{You/He} can\'t do that here. '
 ;
+*/
 
-DefineTAction(Make);
-VerbRule(Make)
-	'make' singleDobj
-	: MakeAction
-	verbPhrase = 'make/making (what)'
+canCraftHere: PreCondition
+	checkPreCondition(obj, allowImplicit) {
+		if(gAction.craftingLocation == nil)
+			return;
 
-	objInScope(obj) {
-		local r;
-
-		if((r = inherited(obj)) == true)
-			return(true);
-
-		return(r);
+		if(!gActor.isIn(gAction.craftingLocation)) {
+			reportFailure(gAction.cantCraftHere);
+			exit;
+		}
 	}
 ;
 
-modify Thing dobjFor(Make) { verify() { illogical(&cantMakeThat); } };
+canCraft: PreCondition
+	verifyPreCondition(obj) {
+		if(obj == nil)
+			obj = gDobj;
+		if(obj.ofKind(RecipeUnthing))
+			illogical(gAction.cantCraftObj(obj));
+		else
+			illogical(gAction.cantCraftThat);
+	
+	}
+;
 
-#endif // CRAFTING_SYSTEM_ACTION
+class _CraftAction: Action;
+
+class CraftAction: _CraftAction, TAction
+	preCond = [ canCraftHere, canCraft ]
+
+	// If defined, this action can only be done in the given location.
+	craftingLocation = nil
+
+	// Verb to use in informational messages:  "You can't craft that. "
+	// and so on.
+	craftingVerb = 'craft'
+
+	// Add RecipeUnthing instances to crafting actions' default scope.
+	objInScope(obj) {
+		local r;
+
+		r = inherited(obj);
+		if(r == true)
+			return(true);
+
+		if(obj.ofKind(RecipeUnthing))
+			return(true);
+
+		return(nil);
+	}
+
+	// Location-based crafting failure message.  This is what's
+	// displayed when the craftingLocation check fails.
+	cantCraftHere = '{You/he} can\'t <<craftingVerb>> here. '
+
+	// 
+	cantCraftObj(obj) {
+		return('{You/he} can\'t <<craftingVerb>> <<obj.name>>. ');
+	}
+
+	// Generic failure message.  
+	cantCraftThat = '{You/He} can\'t <<craftingVerb>> that. '
+;

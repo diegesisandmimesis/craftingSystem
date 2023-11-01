@@ -16,6 +16,9 @@
 
 Recipe template 'recipeID' @result? ->resultLocation? "recipeAction"?;
 
+RecipeShortcut template 'resultVocab' 'resultName' ->action "recipeAction"?;
+RecipeShortcut template @resultClass ->action "recipeAction"?;
+
 IngredientList template 'stepID'? ->gear? "recipeAction"?;
 Ingredient template @ingredient ->gear?;
 
@@ -25,5 +28,8 @@ RecipeStepWithTrigger template 'stepID'? @srcObject | [srcObject] \
 	@dstObject | [dstObject] ->action | [action] "recipeAction"?;
 RecipeStepWithTrigger template 'stepID'? @dstObject | [dstObject] \
 	->action | [action] "recipeAction"?;
+
+#define DefineCraftingAction(name) \
+	DefineTActionSub(name, CraftAction)
 
 #define CRAFTING_SYSTEM_H
