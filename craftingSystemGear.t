@@ -7,12 +7,23 @@
 
 #include "craftingSystem.h"
 
-class CraftingGear: CraftingSystemObject, Thing
+class CraftingThing: CraftingSystemObject, Thing
+	syslogID = 'CraftingThing'
+;
+
+class CraftingRoom: RuleSchedulerRoom, CraftingThing
+	syslogID = 'CraftingRoom'
+
+	becomeCraftingRoom(obj) {
+	}
+;
+
+class CraftingGear: CraftingThing
 	syslogID = 'CraftingGear'
 	syslogFlag = 'CraftingGear'
 ;
 
-class CraftingIngredient: CraftingSystemObject, Thing
+class CraftingIngredient: CraftingThing
 	syslogID = 'CraftingIngredient'
 	syslogFlag = 'CraftingIngredient'
 ;

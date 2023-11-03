@@ -14,6 +14,8 @@
 #error "stateMachine should be in /home/user/tads/stateMachine ."
 #endif // STATE_MACHINE_H
 
+//CraftingSystem 'craftingSystemID'? ->craftingLocation;
+
 Recipe template 'recipeID' @result? ->resultLocation? "recipeAction"?;
 
 RecipeShortcut template 'resultVocab' 'resultName' ->action "recipeAction"?;

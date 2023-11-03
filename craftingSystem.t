@@ -180,6 +180,10 @@ craftingSystemModuleID: ModuleID {
 class CraftingSystemObject: RuleEngineObject
 	syslogID = 'CraftingSystem'
 	syslogFlag = 'CraftingSystem'
+
+	craftingSystemID = nil
+
+	craftingSystemLocation = nil
 ;
 
 // Ownership-agnostic preinit.  Goes through all the various bits of recipes
