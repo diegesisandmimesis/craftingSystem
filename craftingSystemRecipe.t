@@ -42,6 +42,17 @@ class Recipe: StateMachine, CraftingSystemObject
 	// RecipeShortcut instance for this recipe, if defined.
 	_recipeShortcut = nil
 
+	// We're a StateEngine, which is a RuleEngine.  Here we
+	// add a couple of options for figuring out what scheduler to use.
+	initializeRuleEngine() {
+		if(_tryRuleScheduler(craftingLocation))
+			return;
+		if(location && location.craftingLocation
+			&& _tryRuleScheduler(location.craftingLocation))
+			return;
+		inherited();
+	}
+
 	// Called at preinit.
 	initializeRecipe() {
 		// Add the recipe to the crafting system.
