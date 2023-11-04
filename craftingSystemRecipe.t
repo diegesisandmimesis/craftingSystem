@@ -45,10 +45,10 @@ class Recipe: StateMachine, CraftingSystemObject
 	// We're a StateEngine, which is a RuleEngine.  Here we
 	// add a couple of options for figuring out what scheduler to use.
 	initializeRuleEngine() {
-		if(_tryRuleScheduler(craftingLocation))
+		if(_tryRuleScheduler(craftingLocation) == true)
 			return;
-		if(location && location.craftingLocation
-			&& _tryRuleScheduler(location.craftingLocation))
+		if(location &&
+			(_tryRuleScheduler(location.craftingLocation) == true))
 			return;
 		inherited();
 	}

@@ -59,27 +59,10 @@ gameMain: GameMainDef
 		runGame(true);
 	}
 	showIntro() {
-		"This demo includes a simple recipe for toast:
-		<.p>
-		\n<b>&gt;PUT BREAD IN TOASTER</b>
-		\n<b>&gt;TURN TOASTER ON</b>
+		"This is equivalent to the test in toaster.t, but using
+		a location-based rule scheduler.
 		<.p> ";
 	}
-;
-
-class Slice: Thing, Surface, CraftingIngredient
-	desc = "It's <<aName>>. "
-	isEquivalent = true
-;
-
-class Bread: Slice '(slice) bread' 'slice of bread';
-class Toast: Slice '(slice) toast' 'slice of toast';
-class ButteredBread: Bread '(buttered) (slice) bread' 'slice of buttered bread';
-class ButteredToast: Toast '(buttered) (slice) toast' 'slice of buttered toast';
-
-class Butter: CraftingIngredient '(pat) butter' 'pat of butter'
-	"It's <<aName>>. "
-	isEquivalent = true
 ;
 
 startRoom: Room 'Void'
@@ -95,18 +78,7 @@ kitchen: RuleSchedulerRoom 'Kitchen'
 	"This is a featureless kitchen.  The void lies to the south. "
 	south = startRoom
 ;
-+toaster: Container, CraftingGear '(silver) (metal) toaster slot' 'toaster'
-	"A silver toaster with a single slot on the top. "
-	dobjFor(TurnOn) { verify() {} }
-	iobjFor(PutIn) {
-		verify() {
-			if(contents.length != 0)
-				illogicalNow('The toaster can only hold one
-					thing at a time. ');
-		}
-	}
-	canFitObjThruOpening(obj) { return(obj.ofKind(Slice)); }
-;
++toaster: Toaster;
 
 cookingSystem: CraftingSystem
 	craftingLocation = kitchen
