@@ -20,6 +20,7 @@
 #include <en_us.h>
 
 #include "craftingSystem.h"
+#include "linter.h"
 
 versionInfo: GameID
         name = 'craftingSystem Library Demo Game'
@@ -74,18 +75,21 @@ startRoom: Room 'Void'
 ++Bread;
 ++Butter;
 
-kitchen: RuleSchedulerRoom 'Kitchen'
+kitchen: CraftingRoom 'Kitchen'
 	"This is a featureless kitchen.  The void lies to the south. "
 	south = startRoom
 ;
-+toaster: Toaster;
++toaster: RuleScheduler, Toaster;
+//+toaster: Toaster, RuleScheduler;
 
 cookingSystem: CraftingSystem
 	craftingLocation = kitchen
 ;
 
 +Recipe 'toast' @Toast ->toaster
-	"The toaster produces a slice of toast. ";
+	"The toaster produces a slice of toast. "
+	craftingLocation = toaster
+;
 ++RecipeNoAction @toaster ->TurnOnAction
 	"The toaster won't start without bread. ";
 ++IngredientList

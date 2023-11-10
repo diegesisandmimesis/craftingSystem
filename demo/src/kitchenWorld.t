@@ -15,9 +15,9 @@ class Slice: Thing, Surface, CraftingIngredient
 ;
 
 class Bread: Slice '(slice) bread' 'slice of bread';
-class Toast: Slice '(slice) toast' 'slice of toast';
-class ButteredBread: Bread '(buttered) (slice) bread' 'slice of buttered bread';
-class ButteredToast: Toast '(buttered) (slice) toast' 'slice of buttered toast';
+class Toast: Slice, Craftable '(slice) toast' 'slice of toast';
+class ButteredBread: Bread, Craftable '(buttered) (slice) bread' 'slice of buttered bread';
+class ButteredToast: Toast, Craftable '(buttered) (slice) toast' 'slice of buttered toast';
 
 class Butter: CraftingIngredient '(pat) butter' 'pat of butter'
 	"It's <<aName>>. "

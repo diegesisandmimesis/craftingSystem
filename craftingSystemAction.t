@@ -7,24 +7,34 @@
 
 #include "craftingSystem.h"
 
-/*
+// Crafting system shortcut action messages.
+// These are fall-back generic defaults.  They will be overridden by a
+// property of the same name on either the recipe shortcut declaration or
+// the crafting Action declaration (in that order)
 modify playerActionMessages
-	cantCraftThat = '{You/He} can\'t <<gAction.craftingVerb>> that. '
-	cantCraftThatDontKnow = '{You/He} {do}n\'t know how to
-		<<gAction.craftingVerb>> that. '
+	cantCraftHere = '{You/he} can\'t do that here. '
+	cantCraftRecipeUnknown = '{You/He} do{es}n\'t know how to make that. '
+	cantCraftThat = '{You/He} can\'t make that. '
+
 	cantCraftObj(obj) {
-		return('{You/he} can\'t <<gAction.craftingVerb>>
-			<<obj.name>>. ');
+		return('{You/he} can\'t make <<obj.name>>. ');
 	}
-
-	cantCraftHere = '{You/He} can\'t do that here. '
 ;
-*/
 
+// PreCondition that checks if the crafting action can occur in the current
+// location.
 canCraftHere: PreCondition
 	checkPreCondition(obj, allowImplicit) {
+		// We only apply this check if the current action has a
+		// crafting location defined.
 		if(gAction.craftingLocation == nil)
 			return;
+
+		if(obj == nil)
+			obj = gDobj;
+
+		if(obj.ofKind(RecipeShortcutCraftable))
+			obj.verifyCraftingLocation(gAction.craftingLocation);
 
 		if(!gActor.isIn(gAction.craftingLocation)) {
 			reportFailure(gAction.cantCraftHere);
@@ -37,11 +47,12 @@ canCraft: PreCondition
 	verifyPreCondition(obj) {
 		if(obj == nil)
 			obj = gDobj;
-		if(obj.ofKind(RecipeUnthing))
-			illogical(gAction.cantCraftObj(obj));
-		else
-			illogical(gAction.cantCraftThat);
-	
+
+		if(obj.ofKind(RecipeShortcutCraftable)) {
+			obj.verifyShortcut();
+		} else {
+			illogical(&cantCraftThat);
+		}
 	}
 ;
 
@@ -57,7 +68,8 @@ class CraftAction: _CraftAction, TAction
 	// and so on.
 	craftingVerb = 'craft'
 
-	// Add RecipeUnthing instances to crafting actions' default scope.
+	// Add RecipeShortcutCraftable instances to crafting actions'
+	// default scope.
 	objInScope(obj) {
 		local r;
 
@@ -65,21 +77,15 @@ class CraftAction: _CraftAction, TAction
 		if(r == true)
 			return(true);
 
-		if(obj.ofKind(RecipeUnthing))
+		if(obj.ofKind(RecipeShortcutCraftable)) {
 			return(true);
+		}
 
 		return(nil);
 	}
 
-	// Location-based crafting failure message.  This is what's
-	// displayed when the craftingLocation check fails.
-	cantCraftHere = '{You/he} can\'t <<craftingVerb>> here. '
-
-	// 
-	cantCraftObj(obj) {
-		return('{You/he} can\'t <<craftingVerb>> <<obj.name>>. ');
-	}
-
-	// Generic failure message.  
-	cantCraftThat = '{You/He} can\'t <<craftingVerb>> that. '
+	cantCraftObj = nil
+	cantCraftHere = nil
+	cantCraftRecipeUnknown = nil
+	cantCraftThat = nil
 ;

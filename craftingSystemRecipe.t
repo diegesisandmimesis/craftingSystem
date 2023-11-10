@@ -42,6 +42,13 @@ class Recipe: StateMachine, CraftingSystemObject
 	// RecipeShortcut instance for this recipe, if defined.
 	_recipeShortcut = nil
 
+	// Does everyone start out knowing this recipe?
+	startKnown = nil
+
+	// Table of who knows this recipe.  Keys are actors, values are boolean
+	// true if that actor knows this recipe, undefined otherwise.
+	_knowledgeTable = perInstance(new LookupTable())
+
 	// We're a StateEngine, which is a RuleEngine.  Here we
 	// add a couple of options for figuring out what scheduler to use.
 	initializeRuleEngine() {
@@ -71,9 +78,12 @@ class Recipe: StateMachine, CraftingSystemObject
 
 	addRecipeShortcut(obj) {
 		if((obj == nil) || !obj.ofKind(RecipeShortcut))
-			return;
+			return(nil);
 
 		_recipeShortcut = obj;
+		obj.recipe = self;
+
+		return(true);
 	}
 
 	clearResultLocationFlag() {
@@ -188,6 +198,8 @@ class Recipe: StateMachine, CraftingSystemObject
 			_produceSingleResult(result, loc);
 		}
 
+		learnRecipe(gActor);
+
 		// If we have further stuff to do on recipe completion, we
 		// do it now.
 		recipeAction();
@@ -229,6 +241,18 @@ class Recipe: StateMachine, CraftingSystemObject
 			return(true);
 		if(gActor.getOutermostRoom() != craftingLocation)
 			return(nil);
+		return(true);
+	}
+
+	isKnownBy(actor) {
+		if(actor == nil) return(nil);
+		if(startKnown == true) return(true);
+		return(_knowledgeTable[actor] == true);
+	}
+
+	learnRecipe(actor) {
+		if(actor == nil) return(nil);
+		_knowledgeTable[actor] = true;
 		return(true);
 	}
 ;

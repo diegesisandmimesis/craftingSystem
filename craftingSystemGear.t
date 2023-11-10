@@ -11,11 +11,12 @@ class CraftingThing: CraftingSystemObject, Thing
 	syslogID = 'CraftingThing'
 ;
 
-class CraftingRoom: RuleSchedulerRoom, CraftingThing
-	syslogID = 'CraftingRoom'
+class Craftable: CraftingThing, RecipeShortcutCraftable
+;
 
-	becomeCraftingRoom(obj) {
-	}
+class CraftingRoom: RuleScheduler, Room, CraftingThing
+//class CraftingRoom: Room, RuleScheduler, CraftingThing
+	syslogID = 'CraftingRoom'
 ;
 
 class CraftingGear: CraftingThing

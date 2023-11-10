@@ -76,9 +76,14 @@ RuleEngine;
 cookingSystem: CraftingSystem;
 
 +Recipe 'toast' @Toast ->toaster
-	"The toaster produces a slice of toast. ";
+	"The toaster produces a slice of toast. "
+	//startKnown = true
+;
 ++RecipeShortcut 'toast' 'toast' ->MakeAction
-	"{You/He} make{s} some toast. ";
+	"{You/He} make{s} some toast. "
+	cantCraftRecipeUnknown = '{You/He} do{es}n\'t know how to toast
+		bread, amazingly. '
+;
 ++RecipeNoAction @toaster ->TurnOnAction
 	"The toaster won't start without bread. ";
 ++IngredientList

@@ -8,4 +8,5 @@ source: craftingSystemIngredient.t
 source: craftingSystemGear.t
 source: craftingSystemRecipeShortcut.t
 source: craftingSystemAction.t
+source: craftingSystemLinter.t
 source: craftingSystemDebug.t

@@ -190,6 +190,8 @@ class CraftingSystemObject: RuleEngineObject
 // and makes sure they're inintialized, but we don't keep track of anything
 // in this singleton.
 craftingSystemPreinit: PreinitObject
+	execBeforeMe = static [ ruleEnginePreinit ]
+
 	execute() {
 		initializeIngredients();
 		initializeRecipeSteps();
@@ -218,12 +220,61 @@ craftingSystemPreinit: PreinitObject
 	initializeRecipes() {
 		forEachInstance(Recipe, function(o) {
 			o.initializeRecipe();
+			craftingSystemManager.addRecipe(o);
 		});
 	}
 
 	initializeRecipeShortcuts() {
 		forEachInstance(RecipeShortcut, function(o) {
 			o.initializeRecipeShortcut();
+		});
+	}
+;
+
+craftingSystemManager: CraftingSystemObject
+	_recipeTable = perInstance(new LookupTable)
+	_recipeIndex = 0
+
+	addRecipe(obj) {
+		if((obj == nil) || !obj.ofKind(Recipe))
+			return(nil);
+		if(obj.result == nil)
+			return(nil);
+
+		_recipeIndex += 1;
+
+		obj.result._recipeIndex = _recipeIndex;
+
+		if(_recipeTable[_recipeIndex] == nil)
+			_recipeTable[_recipeIndex] = new Vector();
+		_recipeTable[_recipeIndex].append(obj);
+
+		return(true);
+	}
+
+	getRecipeFor(obj, n?) {
+		local l;
+
+		if((l = getRecipesFor(obj)) == nil)
+			return(nil);
+		if(n == nil)
+			n = 1;
+		if((n < 1) || (n > l.length))
+			return(nil);
+		return(l[n]);
+	}
+
+	getRecipesFor(obj) { return(_recipeTable[obj._recipeIndex]); }
+
+	listRecipes() {
+		local i;
+
+		i = 0;
+		_recipeTable.keysToList().forEach(function(o) {
+			aioSay('\nobj = <<toString(o)>>\n ');
+			local obj = getRecipeFor(o);
+			aioSay('\n\trecipe <<toString(i)>>:  <q><<obj.recipeID>></q>\n ');
+			i += 1;
 		});
 	}
 ;
