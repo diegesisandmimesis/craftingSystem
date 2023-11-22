@@ -158,11 +158,74 @@ class IngredientList: RecipeStepWithState
 	_testGear(v) { return((v != nil) && v.ofKind(CraftingGear)); }
 
 	// Consume our ingredients.
-	consumeIngredients() {
-		// We delegate the task to the rule;  it knows where
-		// everything is.
-		if(recipeRule)
-			recipeRule.consumeIngredients();
+	consumeIngredients(fromActor?) {
+		if(fromActor != nil) {
+			// If we got the fromActor argument, then we
+			// need to take the ingredients out of the actor's
+			// inventory.
+			_consumeIngredientsFromActor(fromActor);
+		} else {
+			// We delegate the task to the rule;  it knows where
+			// everything is.
+			if(recipeRule)
+				recipeRule.consumeIngredients();
+		}
+	}
+
+	// Consume the recipe's ingredients, getting them from the given
+	// actor's inventory.
+	_consumeIngredientsFromActor(actor) {
+		if((actor == nil) || !actor.ofKind(Actor))
+			return;
+
+		_ingredientList.forEach(function(o) {
+			o.consumeIngredient(actor);
+		});
+	}
+
+	// Return a list of all the ingredients in our list that the given
+	// actor can't currently access.
+	getMissingIngredients(actor) {
+		local l;
+
+		l = new Vector();
+		_ingredientList.forEach(function(o) {
+			local v;
+
+			if((v = o.getMissingIngredient(actor)) == nil)
+				return;
+
+			l.append(v);
+		});
+
+		if(l.length > 0)
+			return(l);
+
+		return(nil);
+	}
+
+	getMissingGear(actor) {
+		local l;
+
+		l = new Vector();
+
+		if(gear != nil) {
+			if(!actor.canTouch(gear))
+				l.append(gear);
+		}
+		_ingredientList.forEach(function(o) {
+			local v;
+
+			if((v = o.getMissingGear(actor)) == nil)
+				return;
+
+			l.append(v);
+		});
+
+		if(l.length > 0)
+			return(l);
+
+		return(nil);
 	}
 
 	// Stub method.
@@ -194,6 +257,54 @@ class Ingredient: CraftingSystemObject
 			return;
 
 		location.addIngredient(self);
+	}
+
+	getMissingIngredient(actor) {
+		local i, l;
+
+		if((actor == nil) || !actor.ofKind(Actor))
+			return(nil);
+
+		if(ingredient == nil)
+			return(nil);
+
+		l = actor.allContents();
+		for(i = 1; i <= l.length; i++) {
+			if((l[i] == ingredient) || l[i].ofKind(ingredient))
+				return(nil);
+		}
+
+		return(ingredient);
+	}
+
+	getMissingGear(actor) {
+		if((actor == nil) || !actor.ofKind(Actor))
+			return(nil);
+
+		if(gear == nil)
+			return(nil);
+
+		if(actor.canTouch(gear))
+			return(nil);
+
+		return(nil);
+	}
+
+	consumeIngredient(actor?) {
+		local i, l;
+
+		if((actor == nil) || !actor.ofKind(Actor))
+			return(nil);
+
+		l = actor.allContents();
+		for(i = 1; i <= l.length; i++) {
+			if((l[i] == ingredient) || l[i].ofKind(l[i])) {
+				l[i].moveInto(nil);
+				return(true);
+			}
+		}
+
+		return(nil);
 	}
 ;
 

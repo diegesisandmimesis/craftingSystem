@@ -2,6 +2,30 @@
 //
 // craftingSystemRecipeShortcut.t
 //
+//	Classes and logic for recipe shortcuts.
+//
+//	This includes
+//
+//		RecipeShortcutObject
+//			General methods for checking shortcut action
+//			preconditions
+//
+//		RecipeShortcut
+//			Class for shortcut declarations.  Gets methods
+//			called from the generic CraftAction action (and its
+//			preconditions)
+//
+//		RecipeShortcutCraftable
+//			Base class for RecipeUnthing and Craftable.  Includes
+//			the methods needed for CraftAction.
+//
+//		RecipeUnthing
+//			Class for recipe result Unthings.  An Unthing instance
+//			is automatically created for each recipe result, to
+//			handle the vocabulary for actions like >MAKE TOAST
+//			when there's no existing toast object around
+//
+//
 #include <adv3.h>
 #include <en_us.h>
 
@@ -95,14 +119,40 @@ class RecipeShortcut: RecipeShortcutObject
 		_unthing.reinit();
 	}
 
+	// Called by canCraft precondidition.
 	_verifyShortcut() {
+		local r;
+
 		verifyShortcut();
-		if(recipe.isKnownBy(gActor) != true)
+		if(recipe.isKnownBy(gActor) != true) {
 			_illogical(&cantCraftRecipeUnknown);
+			return;
+		}
+		if((r = getMissingGear()) != nil) {
+			_illogical(&cantCraftMissingGear, r);
+			return;
+		}
+		if((r = getMissingIngredients()) != nil) {
+			_illogical(&cantCraftMissingIngredients, r);
+			return;
+		}
+	}
+
+	getMissingIngredients() {
+		if(recipe == nil)
+			return(nil);
+		return(recipe.getMissingIngredients(gActor));
+	}
+
+	getMissingGear() {
+		if(recipe == nil)
+			return(nil);
+		return(recipe.getMissingGear(gActor));
 	}
 
 	verifyShortcut() {}
 
+	// Called by canCraftHere precondition.
 	_verifyCraftingLocation(loc) {
 		verifyCraftingLocation(loc);
 		if(!gActor.isIn(loc))
@@ -117,32 +167,26 @@ class RecipeShortcut: RecipeShortcutObject
 	cantCraftRecipeUnknown = nil
 	cantCraftThat = nil
 
-	recipeAction() {}
-;
-
-class RecipeUnthing: RecipeShortcutCraftable, Unthing
-	shortcut = nil
-
-	reinit() {
-		initializeVocab();
-		addToDictionary(&noun);
-		addToDictionary(&adjective);
-		addToDictionary(&plural);
-		addToDictionary(&adjApostS);
-		addToDictionary(&literalAdjective);
+	// Called from RecipeShortcutCraftable._craftingActionShortcut(),
+	// this is where we actually produce the recipe result.
+	// The assumption is that individual shortcuts *probably* won't
+	// need to overwrite this, and that they'll usually just use
+	// shortcutAction() to display a shortcut-specific action
+	// message.
+	recipeAction() {
+		recipe.consumeIngredients(gActor);
+		recipe.produceResult();
+		shortcutAction();
 	}
 
-	craftingAction() {
-		local r;
-
-		if((r = getResult()) != nil) {
-			r.craftingAction();
-			return;
-		}
-		inherited();
-	}
+	// Shortcut-specific action.  Intended to do shortcut-specific
+	// stuff, like outputting an abbreviated custom description of
+	// making the recipe.
+	shortcutAction() {}
 ;
 
+// Base class for both RecipeUnthing and Craftable.  Includes methods
+// needed for CraftAction.
 class RecipeShortcutCraftable: RecipeShortcutObject
 	// Props for caching results.
 	// We have to do this because we could either be an Unthing (if
@@ -219,7 +263,8 @@ class RecipeShortcutCraftable: RecipeShortcutObject
 		s._verifyShortcut();
 	}
 
-	// Called by the canCraftHere precondition.
+	// Called by the canCraftHere precondition if the crafting action
+	// has an explicit crafting location defined.
 	verifyCraftingLocation(loc) {
 		local s;
 
@@ -246,3 +291,27 @@ class RecipeShortcutCraftable: RecipeShortcutObject
 	// handler.
 	craftingAction() { _craftingActionShortcut(); }
 ;
+
+class RecipeUnthing: RecipeShortcutCraftable, Unthing
+	shortcut = nil
+
+	reinit() {
+		initializeVocab();
+		addToDictionary(&noun);
+		addToDictionary(&adjective);
+		addToDictionary(&plural);
+		addToDictionary(&adjApostS);
+		addToDictionary(&literalAdjective);
+	}
+
+	craftingAction() {
+		local r;
+
+		if((r = getResult()) != nil) {
+			r.craftingAction();
+			return;
+		}
+		inherited();
+	}
+;
+

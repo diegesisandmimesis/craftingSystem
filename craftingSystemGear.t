@@ -11,11 +11,9 @@ class CraftingThing: CraftingSystemObject, Thing
 	syslogID = 'CraftingThing'
 ;
 
-class Craftable: CraftingThing, RecipeShortcutCraftable
-;
+class Craftable: CraftingThing, RecipeShortcutCraftable;
 
 class CraftingRoom: RuleScheduler, Room, CraftingThing
-//class CraftingRoom: Room, RuleScheduler, CraftingThing
 	syslogID = 'CraftingRoom'
 ;
 

@@ -19,26 +19,37 @@ modify playerActionMessages
 	cantCraftObj(obj) {
 		return('{You/he} can\'t make <<obj.name>>. ');
 	}
+
+	cantCraftMissingIngredients(lst) {
+		return('{You/He} can\'t make that, {you/he} need{s}
+			\v<<stringLister.makeSimpleList(lst)>>. ');
+	}
+
+	cantCraftMissingGear(lst) {
+		return('{You/He} can\'t make that, {you/he} need{s}
+			\v<<stringLister.makeSimpleList(lst)>>. ');
+	}
 ;
 
 // PreCondition that checks if the crafting action can occur in the current
 // location.
 canCraftHere: PreCondition
 	checkPreCondition(obj, allowImplicit) {
-		// We only apply this check if the current action has a
-		// crafting location defined.
-		if(gAction.craftingLocation == nil)
-			return;
-
 		if(obj == nil)
 			obj = gDobj;
 
-		if(obj.ofKind(RecipeShortcutCraftable))
-			obj.verifyCraftingLocation(gAction.craftingLocation);
+		// If we're not trying to craft a craftable item, fail.
+		if(!obj.ofKind(RecipeShortcutCraftable)) {
+			reportFailure(&cantCraftThat);
+			return;
+		}
 
-		if(!gActor.isIn(gAction.craftingLocation)) {
-			reportFailure(gAction.cantCraftHere);
-			exit;
+		if(gAction.craftingLocation != nil) {
+			obj.verifyCraftingLocation(gAction.craftingLocation);
+			if(!gActor.isIn(gAction.craftingLocation)) {
+				reportFailure(gAction.cantCraftHere);
+				exit;
+			}
 		}
 	}
 ;
@@ -48,11 +59,12 @@ canCraft: PreCondition
 		if(obj == nil)
 			obj = gDobj;
 
-		if(obj.ofKind(RecipeShortcutCraftable)) {
-			obj.verifyShortcut();
-		} else {
+		if(!obj.ofKind(RecipeShortcutCraftable)) {
 			illogical(&cantCraftThat);
+			return;
 		}
+
+		obj.verifyShortcut();
 	}
 ;
 
@@ -88,4 +100,65 @@ class CraftAction: _CraftAction, TAction
 	cantCraftHere = nil
 	cantCraftRecipeUnknown = nil
 	cantCraftThat = nil
+
+	execAction() {
+		if((gDobj == nil) || !gDobj.ofKind(RecipeShortcutCraftable)) {
+			reportFailure(&cantCraftThat);
+			return;
+		}
+
+		_craftingAction();
+	}
+
+	_craftingAction() {
+		craftingAction();
+		gDobj.craftingAction();
+	}
+
+	craftingAction() {}
 ;
+
+newActorCommandCheck(src, dst, toks, first) {
+	local l;
+
+	l = newActorCommandTranscript(src, dst, toks, first);
+
+	if(l.isFailure)
+		return(nil);
+
+	return(true);
+}
+
+newActorCommandTranscript(src, dst, toks, first) {
+	local tr;
+
+	tr = gTranscript;
+	try {
+		savepoint();
+		gTranscript = new CommandTranscript();
+		executeCommand(src, dst, toks, first);
+//aioSay('actionFailed <<toString(gTranscript.actionFailed(PutInAction))>>\n ');
+		return(gTranscript);
+	}
+	finally {
+		undo();
+		gTranscript = tr;
+	}
+}
+
+newActorCommand(actor, cmd) {
+	local toks;
+
+	if((actor == nil) || !actor.ofKind(Actor) || (cmd == nil))
+		return(nil);
+
+	if((toks = cmdTokenizer.tokenize(cmd)) == nil)
+		return(nil);
+
+	if(!newActorCommandCheck(actor, actor, toks, true))
+		return(nil);
+
+	executeCommand(actor, actor, toks, true);
+
+	return(true);
+}

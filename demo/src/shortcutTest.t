@@ -63,8 +63,14 @@ gameMain: GameMainDef
 	}
 ;
 
-startRoom: Room 'Void' "This is a featureless void.";
+startRoom: Room 'Void' "This is a featureless void. "
+	north = northRoom
+;
 +toaster: Toaster;
+
+northRoom: Room 'North Room' "This is the north room. "
+	south = startRoom
+;
 
 +me: Person, CraftingGear;
 ++Bread;
@@ -77,7 +83,7 @@ cookingSystem: CraftingSystem;
 
 +Recipe 'toast' @Toast ->toaster
 	"The toaster produces a slice of toast. "
-	//startKnown = true
+	startKnown = true
 ;
 ++RecipeShortcut 'toast' 'toast' ->MakeAction
 	"{You/He} make{s} some toast. "

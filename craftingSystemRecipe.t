@@ -218,11 +218,11 @@ class Recipe: StateMachine, CraftingSystemObject
 
 	// Consume all the ingredients used in the recipe, by telling
 	// each recipe step to consume its associated ingredients.
-	consumeIngredients() {
+	consumeIngredients(fromActor) {
 		_recipeStep.forEach(function(o) {
 			if(!o.ofKind(IngredientList))
 				return;
-			o.consumeIngredients();
+			o.consumeIngredients(fromActor);
 		});
 	}
 
@@ -254,5 +254,98 @@ class Recipe: StateMachine, CraftingSystemObject
 		if(actor == nil) return(nil);
 		_knowledgeTable[actor] = true;
 		return(true);
+	}
+
+	// Get all the ingredients for this recipe that the given actor
+	// CANNOT currently access.
+	getMissingIngredients(actor) {
+		local l;
+
+		// Make sure the arg is an actor.
+		if((actor == nil) || !actor.ofKind(Actor))
+			return(nil);
+
+		// Vector of all the missing ingredients.
+		l = new Vector();
+
+		// Go through the recipe steps.
+		_recipeStep.forEach(function(o) {
+			local v;
+
+			// We only care about ingredient lists.
+			if(!o.ofKind(IngredientList))
+				return;
+
+			// Ask the ingredient list which ingredients in
+			// it the actor can't currently access.
+			v = o.getMissingIngredients(actor);
+
+			// If there are none, we're done here.
+			if(v == nil)
+				return;
+
+			// Iterate through the list of missing ingredients
+			// from this step, adding them to the "master" list.
+			// We COULD just use l += v, but that would create
+			// a new Vector instead of just expanding the old one.
+			v.forEach(function(u) { l.append(u); });
+		});
+
+		// If we have missing ingredients, return the list.
+		if(l.length > 0)
+			return(l.toList());
+
+		// Nope, return nil.
+		return(nil);
+	}
+
+	isGear(obj) {
+		return((obj != nil) && obj.ofKind(CraftingGear));
+	}
+
+	getMissingGear(actor) {
+		local l;
+
+		// Make sure the arg is an actor.
+		if((actor == nil) || !actor.ofKind(Actor))
+			return(nil);
+
+		// Vector of all the missing gear.
+		l = new Vector();
+
+		if(resultLocation != nil) {
+			if(!actor.canTouch(resultLocation))
+				l.append(resultLocation);
+		}
+
+		// Go through the recipe steps.
+		_recipeStep.forEach(function(o) {
+			local v;
+
+			// We only care about ingredient lists.
+			if(!o.ofKind(IngredientList))
+				return;
+
+			// Ask the ingredient list which ingredients in
+			// it the actor can't currently access.
+			v = o.getMissingGear(actor);
+
+			// If there are none, we're done here.
+			if(v == nil)
+				return;
+
+			// Iterate through the list of missing ingredients
+			// from this step, adding them to the "master" list.
+			// We COULD just use l += v, but that would create
+			// a new Vector instead of just expanding the old one.
+			v.forEach(function(u) { l.append(u); });
+		});
+
+		// If we have missing ingredients, return the list.
+		if(l.length > 0)
+			return(l.toList());
+
+		// Nope, return nil.
+		return(nil);
 	}
 ;

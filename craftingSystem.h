@@ -19,8 +19,8 @@
 Recipe template 'recipeID' @result? ->resultLocation? "recipeAction"?;
 //Recipe template 'recipeID' @result? ->resultLocation? ->craftingLocation? "recipeAction"?;
 
-RecipeShortcut template 'resultVocab' 'resultName' ->action "recipeAction"?;
-RecipeShortcut template @resultClass ->action "recipeAction"?;
+RecipeShortcut template 'resultVocab' 'resultName' ->action "shortcutAction"?;
+RecipeShortcut template @resultClass ->action "shortcutAction"?;
 
 IngredientList template 'stepID'? ->gear? "recipeAction"?;
 Ingredient template @ingredient ->gear?;
@@ -36,12 +36,7 @@ RecipeStepWithTrigger template 'stepID'? @dstObject | [dstObject] \
 #define gRecipesFor(obj) (craftingSystemManager.getRecipesFor(obj))
 
 #define DefineCraftingAction(name) \
-	modify RecipeShortcutCraftable \
-		dobjFor(name) { \
-			verify() {} \
-			action() { craftingAction(); } \
-		} \
-	; \
+	modify RecipeShortcutCraftable dobjFor(name) { verify() {} }; \
 	DefineTActionSub(name, CraftAction)
 
 #define CRAFTING_SYSTEM_H
