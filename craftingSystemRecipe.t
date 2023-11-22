@@ -228,7 +228,7 @@ class Recipe: StateMachine, CraftingSystemObject
 
 	// Consume all the ingredients used in the recipe, by telling
 	// each recipe step to consume its associated ingredients.
-	consumeIngredients(fromActor) {
+	consumeIngredients(fromActor?) {
 		_recipeStep.forEach(function(o) {
 			if(!o.ofKind(IngredientList))
 				return;

@@ -83,7 +83,7 @@ cookingSystem: CraftingSystem;
 
 +Recipe 'toast' @Toast ->toaster
 	"The toaster produces a slice of toast. "
-	startKnown = true
+	//startKnown = true
 ;
 ++RecipeShortcut 'toast' 'toast' ->MakeAction
 	"{You/He} make{s} some toast. "
