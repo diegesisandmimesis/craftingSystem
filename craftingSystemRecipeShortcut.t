@@ -175,7 +175,7 @@ class RecipeShortcut: RecipeShortcutObject
 	// message.
 	recipeAction() {
 		recipe.consumeIngredients(gActor);
-		recipe.produceResult();
+		recipe.produceResult(true);
 		shortcutAction();
 	}
 

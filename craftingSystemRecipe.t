@@ -174,7 +174,7 @@ class Recipe: StateMachine, CraftingSystemObject
 
 	// Produce whatever the recipe produces.
 	// Called after the final recipe transition.
-	produceResult() {
+	produceResult(silent?) {
 		local loc;
 
 		// If we have no result defined, nothing to do.
@@ -200,9 +200,19 @@ class Recipe: StateMachine, CraftingSystemObject
 
 		learnRecipe(gActor);
 
+		if(silent == true) {
+			gTranscript.deactivate();
+			recipeOutputFilter.activate();
+		}
+
 		// If we have further stuff to do on recipe completion, we
 		// do it now.
 		recipeAction();
+
+		if(silent == true) {
+			recipeOutputFilter.deactivate();
+			gTranscript.activate();
+		}
 	}
 
 	// Produce a single recipe result.
@@ -347,5 +357,18 @@ class Recipe: StateMachine, CraftingSystemObject
 
 		// Nope, return nil.
 		return(nil);
+	}
+;
+
+recipeOutputFilter: OutputFilter
+	isActive = nil
+	activate() { isActive = true; }
+	deactivate() { isActive = nil; }
+	filterText(ostr, val) { return(isActive ? '' : inherited(ostr, val)); }
+;
+
+recipeFilterPreinit: PreinitObject
+	execute() {
+		mainOutputStream.addOutputFilter(recipeOutputFilter);
 	}
 ;
