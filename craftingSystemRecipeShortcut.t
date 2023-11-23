@@ -155,8 +155,8 @@ class RecipeShortcut: RecipeShortcutObject
 	// Called by canCraftHere precondition.
 	_verifyCraftingLocation(loc) {
 		verifyCraftingLocation(loc);
-		if(!gActor.isIn(loc))
-			_reportFailure(&cantCraftHere);
+		if(gActor.isIn(loc))
+			return;
 		_reportFailure(&cantCraftHere);
 	}
 
