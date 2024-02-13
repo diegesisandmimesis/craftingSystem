@@ -7,6 +7,7 @@
 
 #include "craftingSystem.h"
 
+#ifdef LINTER
 #ifdef __DEBUG
 
 // verify that the result has the Craftable class
@@ -44,3 +45,4 @@ modify ruleEngineLinter
 ;
 
 #endif // __DEBUG
+#endif // LINTER
